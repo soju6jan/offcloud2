@@ -33,7 +33,7 @@ blueprint = Blueprint(package_name, package_name, url_prefix='/%s' %  package_na
 menu = {
     'main' : [package_name, 'Offcloud2'],
     'sub' : [
-        ['account', '계정 설정'], ['direct', '기본 다운로드'], ['rss', 'RSS 다운로드'], ['cache', 'Cache 다운로드'], ['log', '로그']
+        ['account', '계정 설정'], ['direct', '기본 다운로드'], ['rss', 'RSS 다운로드'], ['cache', 'Cache'], ['log', '로그']
     ],
     'sub2' : {
         'direct' : [

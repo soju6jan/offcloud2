@@ -27,8 +27,8 @@
   {{ macros.setting_input_text_and_buttons('job_rss_url', 'RSS URL', [['job_test_rss_btn', '링크']]) }}
   {{ macros.setting_select_empty('job_username', '계정', col='6') }}
   {{ macros.setting_input_text('job_folderid', 'Folder ID') }}
-  {{ macros.setting_radio('job_mode', '다운로드 모드', ['캐시만 받기', '전체 받기', '캐시 확인만']) }}
-  {{ macros.setting_input_int('job_cache_confirm_day', '캐시 확인 기간', desc='day 단위') }}
+  {{ macros.setting_radio('job_mode', '다운로드 모드', ['Cache만 받기', '전체 받기', 'Cache 확인만']) }}
+  {{ macros.setting_input_int('job_cache_confirm_day', 'Cache 확인 기간', desc='day 단위') }}
   {{ macros.setting_button([['job_save_btn', '저장'], ['job_remove_btn', '삭제']]) }}
   </form>
 {{ macros.m_modal_end() }}
@@ -112,13 +112,13 @@ function make_job_list(data) {
     str += m_col(2, data[i].folderid);
     tmp = '모드 : '
     if (data[i].mode == '0') {
-      tmp += '캐시만 받기'
-      tmp += '<br>캐시 확인 기간 : ' + data[i].cache_confirm_day
+      tmp += 'Cache만 받기'
+      tmp += '<br>Cache 확인 기간 : ' + data[i].cache_confirm_day
     } else if (data[i].mode == '1') {
       tmp += '전체 받기'
     } else if (data[i].mode == '2') {
-      tmp += '캐시 확인만'
-      tmp += '<br>캐시 확인 기간 : ' + data[i].cache_confirm_day
+      tmp += 'Cache 확인만'
+      tmp += '<br>Cache 확인 기간 : ' + data[i].cache_confirm_day
     }
     str += m_col(2, tmp);
 

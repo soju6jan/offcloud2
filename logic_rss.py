@@ -75,7 +75,7 @@ class LogicRss(object):
         return cached_list
 
 
-    # 캐시 확인되고 다운로드 요청한 피드 처리
+    # Cache 확인되고 다운로드 요청한 피드 처리
     @staticmethod
     def process_cached_feed(feed):
         try:
@@ -163,11 +163,11 @@ class LogicRss(object):
                                                 feed.status = 1
                                             else:
                                                 feed.status = 6
-                                    elif job.mode == '2': #캐시 확인만
+                                    elif job.mode == '2': #Cache 확인만
                                         feed.status = 12
                                 else:
-                                    # 캐시 안되어 있을때
-                                    if job.mode == '1': # 캐시 안되어 있어도 받는 모드
+                                    # Cache 안되어 있을때
+                                    if job.mode == '1': # Cache 안되어 있어도 받는 모드
                                         if over_flag:
                                             feed.status = 2
                                         else:
