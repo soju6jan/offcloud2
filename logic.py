@@ -1,0 +1,172 @@
+# -*- coding: utf-8 -*-
+#########################################################
+# python
+import os
+import traceback
+import time
+import threading
+
+# third-party
+
+# sjva 공용
+from framework import db, scheduler, path_app_root
+from framework.job import Job
+from framework.util import Util
+
+# 패키지
+from .plugin import logger, package_name
+from .model import ModelSetting
+from .logic_rss import LogicRss
+#########################################################
+
+
+class Logic(object): 
+    db_default = {
+        'db_version' : '2',
+        'apikey' : '',
+        'web_page_size': "30", 
+
+        # Direct
+        'default_username' : '',
+        'default_folder_id' : '',
+        
+        # RSS
+        'request_http_start_link' : 'False',
+        'auto_start_rss' : 'False',
+        'interval_rss' : '10',
+
+        # cache
+        'cache_save_type_list' : '',
+        'cache_receive_info_send_telegram' : 'False'
+    }
+
+    @staticmethod
+    def db_init():
+        try:
+            for key, value in Logic.db_default.items():
+                if db.session.query(ModelSetting).filter_by(key=key).count() == 0:
+                    db.session.add(ModelSetting(key, value))
+            db.session.commit()
+            Logic.migration()
+        except Exception as e: 
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+
+
+    @staticmethod
+    def plugin_load():
+        try:
+            Logic.db_init()
+            if ModelSetting.get_bool('auto_start_rss'):
+                Logic.scheduler_start(sub='rss')
+            if ModelSetting.get_bool('auto_start_cache'):
+                Logic.scheduler_start(sub='cache')
+            from plugin import plugin_info
+            Util.save_from_dict_to_json(plugin_info, os.path.join(os.path.dirname(__file__), 'info.json'))   
+        except Exception as e: 
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+
+
+    @staticmethod
+    def plugin_unload():
+        pass
+
+      
+    @staticmethod
+    def scheduler_start(sub=None):
+        if sub == 'rss':
+            job = Job(package_name, '%s_rss' % package_name, ModelSetting.get('interval_rss'), LogicRss.scheduler_function, u"Offcloud RSS 스케쥴링", False)
+            scheduler.add_job_instance(job)
+        elif sub == 'cache':
+            job = Job(package_name, '%s_cache' % package_name, ModelSetting.get('interval_cache'), LogicCache.scheduler_function, u"Offcloud Cache 스케쥴링", False)
+            scheduler.add_job_instance(job)
+
+    @staticmethod
+    def scheduler_stop(sub=None):
+        try:
+            tmp = '%s_%s' % (package_name, sub)
+            logger.debug('%s scheduler_stop' % tmp)
+            scheduler.remove_job(tmp)
+        except Exception as e: 
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+
+
+    """
+    @staticmethod
+    def scheduler_function():
+        pass
+    """
+    
+    @staticmethod
+    def reset_db(sub=None):
+        try:
+            logger.debug(sub)
+            if sub == 'rss':
+                db.session.query(ModelOffcloud2Item).delete()
+                db.session.commit()
+            elif sub == 'cache':
+                db.session.query(ModelOffcloud2Cache).delete()
+                db.session.commit()
+            return True
+        except Exception as e: 
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+            return False
+
+    
+    @staticmethod
+    def one_execute(sub=None):
+        logger.debug(sub)
+        try:
+            tmp = '%s_%s' % (package_name, sub)
+            if scheduler.is_include(tmp):
+                if scheduler.is_running(tmp):
+                    ret = 'is_running'
+                else:
+                    scheduler.execute_job(tmp)
+                    ret = 'scheduler'
+            else:
+                def func():
+                    time.sleep(2)
+                    if sub == 'rss':
+                        LogicRss.scheduler_function()
+                    elif sub == 'cache':
+                        LogicCache.scheduler_function()
+                threading.Thread(target=func, args=()).start()
+                ret = 'thread'
+        except Exception as e: 
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+            ret = 'fail'
+        return ret
+    
+    """
+    @staticmethod
+    def process_telegram_data(data):
+        try:
+            logger.debug(data)
+        except Exception as e: 
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+    """
+    
+
+    @staticmethod
+    def migration():
+        try:
+            db_version = ModelSetting.get('db_version')
+            if ModelSetting.get('db_version') == '1':
+                import sqlite3
+                db_file = os.path.join(path_app_root, 'data', 'db', '%s.db' % package_name)
+                connection = sqlite3.connect(db_file)
+                cursor = connection.cursor()
+                query = 'ALTER TABLE %s_rss ADD completed_time DATETIME' % (package_name)
+                cursor.execute(query)
+                connection.close()
+                ModelSetting.set('db_version', '2')
+                db.session.flush()
+        except Exception as e:
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
