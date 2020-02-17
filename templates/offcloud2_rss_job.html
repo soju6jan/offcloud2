@@ -143,7 +143,7 @@ $("body").on('click', '#add_job_btn', function(e){
   document.getElementById("job_folderid").value = ''
   document.getElementById("job_cache_confirm_day").value = 7
   document.getElementById("job_remove_btn").disabled = true;
-  
+  $('input[name=job_mode]')[0].checked = true;
   $("#job_modal").modal();
 });
 
@@ -160,6 +160,8 @@ $("body").on('click', '#job_setting_btn', function(e){
       document.getElementById("job_folderid").value = current_data.jobs[i].folderid;
       document.getElementById("job_cache_confirm_day").value = current_data.jobs[i].cache_confirm_day;
       document.getElementById("job_remove_btn").disabled = false;
+      $('input[name=job_mode]').checked = false;
+      $('input[name=job_mode]')[parseInt(current_data.jobs[i].mode)].checked = true;
       break
     }
   }
