@@ -558,7 +558,6 @@ class ModelOffcloud2Cache(db.Model):
             count = req.args.get('count')
             if count is None or count == '':
                 count = 100
-
             query = ModelOffcloud2Cache.make_query(content_type=content_type, search=search)
             query = (query.order_by(desc(ModelOffcloud2Cache.id))
                         .limit(count)
@@ -575,7 +574,15 @@ class ModelOffcloud2Cache(db.Model):
         try:
             query = db.session.query(ModelOffcloud2Cache)
             if content_type is not None and content_type != '' and content_type != 'all':
-                query = query.filter_by(content_type=content_type)
+                if content_type.find('|') != -1:
+                    tmp = content_type.split('|')
+                    conditions = []
+                    for tt in tmp:
+                        if tt != '':
+                            conditions.append(ModelOffcloud2Cache.content_type == tt.strip())
+                    query = query.filter(or_(*conditions))
+                else:
+                    query = query.filter_by(content_type=content_type)
 
             if search is not None and search != '':
                 if search.find('|') != -1:
