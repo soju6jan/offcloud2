@@ -15,7 +15,7 @@ from framework.util import Util
 
 # 패키지
 from .plugin import logger, package_name
-from .model import ModelSetting
+from .model import ModelSetting, ModelOffcloud2Item, ModelOffcloud2Cache
 from .logic_rss import LogicRss
 #########################################################
 
