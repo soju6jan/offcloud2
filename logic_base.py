@@ -18,7 +18,7 @@ from framework.common.rss import RssUtil
 from .plugin import logger, package_name
 from .model import ModelSetting, ModelOffcloud2Account, ModelOffcloud2Job,  ModelOffcloud2Item, ModelOffcloud2Cache
 from .offcloud_api import Offcloud
-import telegram_bot
+
 #########################################################
 
 
