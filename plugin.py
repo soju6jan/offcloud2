@@ -11,7 +11,7 @@ from flask_login import login_required
 
 # sjva 공용
 from framework.logger import get_logger
-from framework import app, db, scheduler
+from framework import app, db, scheduler, check_api
 from framework.util import Util
 
 # 패키지
@@ -144,6 +144,7 @@ def second_menu(sub, sub2):
 # For UI
 #########################################################
 @blueprint.route('/ajax/<sub>', methods=['GET', 'POST'])
+@login_required
 def ajax(sub):
     try:
         if sub == 'apikey':
@@ -234,6 +235,7 @@ def ajax(sub):
 # API
 #########################################################
 @blueprint.route('/api/<sub>', methods=['GET', 'POST'])
+@check_api
 def api(sub):
     try:
         # 텔레그램 & sjva.me

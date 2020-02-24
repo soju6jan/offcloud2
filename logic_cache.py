@@ -45,7 +45,7 @@ class LogicCache(object):
                         msg += '%s\n' % data['n']
                         from system.model import ModelSetting as SystemModelSetting
                         ddns = SystemModelSetting.get('ddns')
-                        msg += '➕ 리모트 다운로드 추가\n%s/%s/api/cache_download?id=%s' % (ddns, package_name, ret.id)
+                        msg += '➕ 리모트 다운로드 추가\n%s/%s/api/cache_download?id=%s&apikey=%s' % (ddns, package_name, ret.id, SystemModelSetting.get('auth_apikey'))
                         telegram_bot.TelegramHandle.sendMessage(msg)
 
         except Exception as e:
