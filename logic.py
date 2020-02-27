@@ -59,8 +59,6 @@ class Logic(object):
             Logic.db_init()
             if ModelSetting.get_bool('auto_start_rss'):
                 Logic.scheduler_start(sub='rss')
-            if ModelSetting.get_bool('auto_start_cache'):
-                Logic.scheduler_start(sub='cache')
             from plugin import plugin_info
             Util.save_from_dict_to_json(plugin_info, os.path.join(os.path.dirname(__file__), 'info.json'))   
         except Exception as e: 
