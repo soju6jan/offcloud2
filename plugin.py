@@ -114,6 +114,8 @@ def second_menu(sub, sub2):
                 from system.model import ModelSetting as SystemModelSetting
                 ddns = SystemModelSetting.get('ddns')
                 arg['rss_api'] = '%s/%s/api/%s' % (ddns, package_name, sub)
+                if SystemModelSetting.get_bool('auth_use_apikey'):
+                    arg['rss_api'] += '?apikey=%s' % SystemModelSetting.get('auth_apikey')
                 return render_template('%s_%s_%s.html' % (package_name, sub, sub2), arg=arg)
             elif sub2 in ['job', 'list']:
                 arg['is_available_normal_download'] = False
@@ -131,6 +133,8 @@ def second_menu(sub, sub2):
                 from system.model import ModelSetting as SystemModelSetting
                 ddns = SystemModelSetting.get('ddns')
                 arg['rss_api'] = '%s/%s/api/%s' % (ddns, package_name, sub)
+                if SystemModelSetting.get_bool('auth_use_apikey'):
+                    arg['rss_api'] += '?apikey=%s' % SystemModelSetting.get('auth_apikey')
                 return render_template('%s_%s_%s.html' % (package_name, sub, sub2), arg=arg)
             elif sub2 == 'list':
                 arg['type'] = ['KTV', 'KTV_ETC', 'MOVIE', 'MOVIE_ETC', 'MUSIC', 'SHOW', 'ANI', 'PROGRAM', 'JAV_CENSORED_DMM', 'JAV_CENSORED_JAVDB', 'JAV_CENSORED_ETC', 'JAV_UNCENSORED', 'AV_WEST', 'AV_EAST', 'ETC']
