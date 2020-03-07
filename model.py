@@ -556,13 +556,15 @@ class ModelOffcloud2Cache(db.Model):
             content_type = req.args.get('type')
             search = req.args.get('search')
             count = req.args.get('count')
+            id_mod = req.args.get('id_mod')
             if count is None or count == '':
                 count = 100
-            query = ModelOffcloud2Cache.make_query(content_type=content_type, search=search)
+            query = ModelOffcloud2Cache.make_query(content_type=content_type, search=search, id_mod=id_mod)
             query = (query.order_by(desc(ModelOffcloud2Cache.id))
                         .limit(count)
                 )
             lists = query.all()
+            logger.debug('RET count : %s', len(lists))
             return lists
         except Exception, e:
             logger.debug('Exception:%s', e)
@@ -570,7 +572,7 @@ class ModelOffcloud2Cache(db.Model):
 
 
     @staticmethod
-    def make_query(content_type='all', search=''):
+    def make_query(content_type='all', search='', id_mod=''):
         try:
             query = db.session.query(ModelOffcloud2Cache)
             if content_type is not None and content_type != '' and content_type != 'all':
@@ -599,6 +601,11 @@ class ModelOffcloud2Cache(db.Model):
                             query = query.filter(ModelOffcloud2Cache.name.like('%'+tt.strip()+'%'))
                 else:
                     query = query.filter(ModelOffcloud2Cache.name.like('%'+search+'%'))
+            if id_mod is not None and id_mod != '':
+                tmp = id_mod.split('_')
+                if len(tmp) == 2:
+                    query = query.filter(ModelOffcloud2Cache.id % int(tmp[0]) == int(tmp[1]))
+
             return query
         except Exception, e:
             logger.debug('Exception:%s', e)
