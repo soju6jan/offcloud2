@@ -47,7 +47,7 @@ class LogicCache(object):
                         url = '%s/%s/api/cache_download?id=%s' % (ddns, package_name, ret.id)
                         if SystemModelSetting.get_bool('auth_use_apikey'):
                             url += '&apikey=%s' % SystemModelSetting.get('auth_apikey')
-                        msg += '➕ 리모트 다운로드 추가\n%s' % url
+                        msg += '➕ 리모트 다운로드 추가\n<%s>' % url
                         import framework.common.notify as Notify
                         Notify.send_message(msg, message_id='offcloud2_cache_receive')
         except Exception as e:
