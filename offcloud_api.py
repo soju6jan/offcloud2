@@ -30,7 +30,7 @@ class Offcloud(object):
         except Exception as e:
             logger.debug('Exception:%s', e)
             logger.debug(traceback.format_exc())
-            return None
+            return None 
 
 
     @staticmethod

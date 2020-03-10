@@ -39,7 +39,6 @@ class LogicCache(object):
                 if ret is not None:
                     logger.debug('Offcloud2 %s append' % ret.name)
                     if ModelSetting.get_bool('cache_receive_info_send_telegram'):
-                        import telegram_bot
                         msg = '😉 Offcloud2 캐쉬 정보 수신\n'
                         msg += 'Type : %s\n' % data['t']
                         msg += '%s\n' % data['n']
@@ -49,8 +48,8 @@ class LogicCache(object):
                         if SystemModelSetting.get_bool('auth_use_apikey'):
                             url += '&apikey=%s' % SystemModelSetting.get('auth_apikey')
                         msg += '➕ 리모트 다운로드 추가\n%s' % url
-                        telegram_bot.TelegramHandle.sendMessage(msg)
-
+                        import framework.common.notify as Notify
+                        Notify.send_message(msg, message_id='offcloud2_cache_receive')
         except Exception as e:
             logger.error(e)
             logger.error(traceback.format_exc())
