@@ -298,6 +298,9 @@ class ModelOffcloud2Item(db.Model):
     oc_json = db.Column(db.JSON)
     #job = db.relationship('ModelOffcloud2Job', lazy=True)
 
+    # DB Version 3
+    link_to_notify_status = db.Column(db.String) #1이면 보고함.
+
     def __init__(self):
         self.created_time = datetime.datetime.now()
         self.status = 0

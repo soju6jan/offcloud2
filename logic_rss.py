@@ -83,6 +83,8 @@ class LogicRss(object):
             entity = ModelOffcloud2Cache.get_by_magnet(feed.link)
             if entity is not None:
                 return
+            if feed.link_to_notify_status is not None and feed.link_to_notify_status == '1':
+                return
             # sjva server에게만 알리는 것으로 변경. 서버가 대신 뿌림
             telegram = {
                 'title' : feed.title,
@@ -96,6 +98,9 @@ class LogicRss(object):
                 data = {'data':telegram_text}
                 res = requests.post(sjva_server_url, data=data)
                 tmp = res.content
+                feed.link_to_notify_status = '1'
+                db.session.add(feed)
+                db.session.commit()
                 if res.content == 'append':
                     return True
                 elif res.content == 'exist':

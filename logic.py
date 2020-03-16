@@ -22,7 +22,7 @@ from .logic_rss import LogicRss
 
 class Logic(object): 
     db_default = {
-        'db_version' : '2',
+        'db_version' : '3',
         'apikey' : '',
         'web_page_size': "30", 
 
@@ -164,6 +164,16 @@ class Logic(object):
                 cursor.execute(query)
                 connection.close()
                 ModelSetting.set('db_version', '2')
+                db.session.flush()
+            elif ModelSetting.get('db_version') == '2':
+                import sqlite3
+                db_file = os.path.join(path_app_root, 'data', 'db', '%s.db' % package_name)
+                connection = sqlite3.connect(db_file)
+                cursor = connection.cursor()
+                query = 'ALTER TABLE %s_rss ADD link_to_notify_status VARCHAR' % (package_name)
+                cursor.execute(query)
+                connection.close()
+                ModelSetting.set('db_version', '3')
                 db.session.flush()
         except Exception as e:
             logger.error('Exception:%s', e)
