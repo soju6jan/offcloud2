@@ -273,11 +273,11 @@ class LogicRss(object):
                 logger.debug(len(items))
                 if items:
                     for feed in items:
-                        feed.make_torrent_info()
-                        db.session.add(feed)
+                        if feed.make_torrent_info()
+                            db.session.add(feed)
+                        
+                            db.session.commit()
                         logger.debug(feed.title)
-                        db.session.commit()
-                
 
                 lists = os.listdir(job.mount_path)
                 for target in lists:
@@ -289,6 +289,8 @@ class LogicRss(object):
                         if os.path.splitext(target.lower())[1] in ['.smi', '.srt', 'ass']:
                             celery_task.move(fullpath, job.move_path)
                             continue
+                        if os.path.splitext(target.lower())[1] == '.aria2__temp':
+                            os.remove(fullpath)
 
                         # 해쉬 변경
                         match = re.match(r'\w{40}', target)

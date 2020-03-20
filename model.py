@@ -355,10 +355,11 @@ class ModelOffcloud2Item(db.Model):
                     self.filename = info['filename']
                     self.dirname = info['dirname']
                     self.filecount = tmp['num_files']
+                    return True
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
-
+        return False
 
 
     @staticmethod
