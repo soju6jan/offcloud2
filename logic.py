@@ -198,11 +198,11 @@ class Logic(object):
                 except: pass
 
                 connection.close()
-                ModelSetting.set('db_version', '3')
+                ModelSetting.set('db_version', '4')
                 db.session.flush()
-            if ModelSetting.get('db_version') == '4':
-                ModelSetting.set('db_version', '3')
-                db.session.flush()
+            #if ModelSetting.get('db_version') == '4':
+            #    ModelSetting.set('db_version', '3')
+            #    db.session.flush()
         except Exception as e:
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
