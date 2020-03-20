@@ -263,7 +263,7 @@ class LogicRss(object):
                 if not job.use_tracer:
                     continue
 
-                # 토렌트 인포가 실패할수도 있고, 중간에 추가된 경우도 있기 때문에... 기존에 없었던 경우도 있기때문에..
+                # 토렌트 인포가 실패할수도 있고, 중간에 추가된 경우도 있기 때문에...
                 query = db.session.query(ModelOffcloud2Item) \
                     .filter(ModelOffcloud2Item.job_id == job.id ) \
                     .filter(ModelOffcloud2Item.oc_status != None ) \
@@ -273,7 +273,7 @@ class LogicRss(object):
                 logger.debug(len(items))
                 if items:
                     for feed in items:
-                        if feed.make_torrent_info()
+                        if feed.make_torrent_info():
                             db.session.add(feed)
                         
                             db.session.commit()
