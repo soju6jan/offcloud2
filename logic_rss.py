@@ -18,6 +18,7 @@ from framework import db, scheduler, path_app_root, SystemModelSetting
 from framework.job import Job
 from framework.util import Util
 from framework.common.rss import RssUtil
+import framework.common.celery as celery_task
 
 # 패키지
 from .plugin import logger, package_name
@@ -284,6 +285,11 @@ class LogicRss(object):
                         logger.debug(target)
                         fullpath = os.path.join(job.mount_path, target)
 
+                        # 자막파일은 바로 이동
+                        if os.path.splitext(target.lower())[1] in ['.smi', '.srt', 'ass']:
+                            celery_task.move(fullpath, job.move_path)
+                            continue
+
                         # 해쉬 변경
                         match = re.match(r'\w{40}', target)
                         if match:
@@ -298,7 +304,6 @@ class LogicRss(object):
                                 else:
                                     new_fullpath = os.path.join(job.mount_path, feeds[0].filename)
                                 if not os.path.exists(new_fullpath):
-                                    import framework.common.celery as celery_task
                                     celery_task.move(fullpath, new_fullpath)
                                     logger.debug('Hash %s %s', fullpath, new_fullpath)
                                     fullpath = new_fullpath
@@ -325,7 +330,6 @@ class LogicRss(object):
                                 feeds = query.all()
                                 if len(feeds) == 1:
                                     #rename
-                                    import framework.common.celery as celery_task
                                     new_fullpath = os.path.join(job.mount_path, feeds[0].filename)
                                     celery_task.move(fullpath, new_fullpath)
                                     fullpath = new_fullpath
@@ -358,7 +362,6 @@ class LogicRss(object):
                                     dest_folder = dup_folder
                                 else:
                                     dest_folder = job.move_path
-                                import framework.common.celery as celery_task
                                 celery_task.move(fullpath, dest_folder)
                                 logger.debug('MOVE : %s' % fullpath)
                     except Exception, e:
