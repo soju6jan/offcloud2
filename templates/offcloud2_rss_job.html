@@ -29,6 +29,12 @@
   {{ macros.setting_input_text('job_folderid', 'Folder ID') }}
   {{ macros.setting_radio('job_mode', '다운로드 모드', ['Cache만 받기', '전체 받기', 'Cache 확인만']) }}
   {{ macros.setting_input_int('job_cache_confirm_day', 'Cache 확인 기간', desc='day 단위') }}
+  {{ macros.setting_checkbox('job_use_tracer', '다운로드 추적', desc=['On : hash 로 된 이름을 변경']) }}
+  <div id="job_use_tracer_div" class="collapse">
+  {{ macros.setting_input_text('job_mount_path', '마운트 경로', desc=None) }}
+  {{ macros.setting_input_text('job_move_path', '이동 경로', desc=['다운로드 완료 된 파일이나 폴더를 이동할 경로.']) }}
+  {{ macros.setting_input_text('job_call_job', '파일 이동 후 호출할 작업', desc=['아직 안됩니다.!!!', '플러그인명_ID. 구분자 | 또는 엔터', '예) rclone_5|command_2']) }}
+  </div>
   {{ macros.setting_button([['job_save_btn', '저장'], ['job_remove_btn', '삭제']]) }}
   </form>
 {{ macros.m_modal_end() }}
@@ -144,7 +150,16 @@ $("body").on('click', '#add_job_btn', function(e){
   document.getElementById("job_cache_confirm_day").value = 7
   document.getElementById("job_remove_btn").disabled = true;
   $('input[name=job_mode]')[0].checked = true;
+  $('#job_use_tracer').bootstrapToggle('off')
+  document.getElementById("job_mount_path").value = ''
+  document.getElementById("job_move_path").value = ''
+  document.getElementById("job_call_job").value = ''
+  $('#job_use_tracer_div').collapse('hide')
   $("#job_modal").modal();
+});
+
+$('#job_use_tracer').change(function() {
+  use_collapse('job_use_tracer');
 });
 
 // 수정
@@ -162,6 +177,16 @@ $("body").on('click', '#job_setting_btn', function(e){
       document.getElementById("job_remove_btn").disabled = false;
       $('input[name=job_mode]').checked = false;
       $('input[name=job_mode]')[parseInt(current_data.jobs[i].mode)].checked = true;
+      document.getElementById("job_mount_path").value = current_data.jobs[i].mount_path
+      document.getElementById("job_move_path").value = current_data.jobs[i].move_path
+      document.getElementById("job_call_job").value = current_data.jobs[i].call_job
+      if (current_data.jobs[i].use_tracer) {
+        $('#job_use_tracer_div').collapse('show')
+        $('#job_use_tracer').bootstrapToggle('on')
+      } else {
+        $('#job_use_tracer_div').collapse('hide')
+        $('#job_use_tracer').bootstrapToggle('off')
+      }
       break
     }
   }

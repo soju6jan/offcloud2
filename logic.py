@@ -22,7 +22,7 @@ from .logic_rss import LogicRss
 
 class Logic(object): 
     db_default = {
-        'db_version' : '3',
+        'db_version' : '4',
         'apikey' : '',
         'web_page_size': "30", 
 
@@ -34,6 +34,7 @@ class Logic(object):
         'request_http_start_link' : 'False',
         'auto_start_rss' : 'False',
         'interval_rss' : '10',
+        'tracer_max_day' : '3',
 
         # cache
         'cache_save_type_list' : '',
@@ -154,7 +155,6 @@ class Logic(object):
     @staticmethod
     def migration():
         try:
-            db_version = ModelSetting.get('db_version')
             if ModelSetting.get('db_version') == '1':
                 import sqlite3
                 db_file = os.path.join(path_app_root, 'data', 'db', '%s.db' % package_name)
@@ -165,7 +165,7 @@ class Logic(object):
                 connection.close()
                 ModelSetting.set('db_version', '2')
                 db.session.flush()
-            elif ModelSetting.get('db_version') == '2':
+            if ModelSetting.get('db_version') == '2':
                 import sqlite3
                 db_file = os.path.join(path_app_root, 'data', 'db', '%s.db' % package_name)
                 connection = sqlite3.connect(db_file)
@@ -173,6 +173,34 @@ class Logic(object):
                 query = 'ALTER TABLE %s_rss ADD link_to_notify_status VARCHAR' % (package_name)
                 cursor.execute(query)
                 connection.close()
+                ModelSetting.set('db_version', '3')
+                db.session.flush()
+            if ModelSetting.get('db_version') == '3':
+                import sqlite3
+                db_file = os.path.join(path_app_root, 'data', 'db', '%s.db' % package_name)
+                connection = sqlite3.connect(db_file)
+                cursor = connection.cursor()
+                try: cursor.execute('ALTER TABLE %s_job ADD use_tracer INTEGER' % (package_name))
+                except: pass
+                try: cursor.execute('ALTER TABLE %s_job ADD mount_path VARCHAR' % (package_name))
+                except: pass
+                try: cursor.execute('ALTER TABLE %s_job ADD move_path VARCHAR' % (package_name))
+                except: pass
+                try: cursor.execute('ALTER TABLE %s_job ADD call_job VARCHAR' % (package_name))
+                except: pass
+                try: cursor.execute('ALTER TABLE %s_rss ADD torrent_info JSON' % (package_name))
+                except: pass
+                try: cursor.execute('ALTER TABLE %s_rss ADD filename VARCHAR' % (package_name))
+                except: pass
+                try: cursor.execute('ALTER TABLE %s_rss ADD dirname VARCHAR' % (package_name))
+                except: pass
+                try: cursor.execute('ALTER TABLE %s_rss ADD filecount INTEGER' % (package_name))
+                except: pass
+
+                connection.close()
+                ModelSetting.set('db_version', '3')
+                db.session.flush()
+            if ModelSetting.get('db_version') == '4':
                 ModelSetting.set('db_version', '3')
                 db.session.flush()
         except Exception as e:

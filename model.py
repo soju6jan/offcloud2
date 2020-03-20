@@ -14,6 +14,7 @@ from framework.util import Util
 
 # 패키지
 from .plugin import logger, package_name
+from sqlalchemy.orm.attributes import flag_modified
 
 #########################################################
 
@@ -201,9 +202,16 @@ class ModelOffcloud2Job(db.Model):
     include_keyword = db.Column(db.String)
     exclude_keyword = db.Column(db.String)
     rss_list = db.relationship('ModelOffcloud2Item', backref='job', lazy=True) 
+    
+    # db_version 4
+    use_tracer = db.Column(db.Boolean)
+    mount_path = db.Column(db.String)
+    move_path = db.Column(db.String)
+    call_job = db.Column(db.String)
 
     def __init__(self):
         self.created_time = datetime.datetime.now()
+        self.use_tracer = False
 
     def __repr__(self):
         return repr(self.as_dict())
@@ -227,6 +235,11 @@ class ModelOffcloud2Job(db.Model):
             job.folderid = req.form['job_folderid']
             job.mode = req.form['job_mode']
             job.cache_confirm_day = int(req.form['job_cache_confirm_day'])
+            logger.debug(req.form['job_use_tracer'])
+            job.use_tracer = (req.form['job_use_tracer'] == 'True')
+            job.mount_path = req.form['job_mount_path']
+            job.move_path = req.form['job_move_path']
+            job.call_job = req.form['job_call_job']
             db.session.add(job)
             db.session.commit()
             return 'success'                  
@@ -300,6 +313,12 @@ class ModelOffcloud2Item(db.Model):
 
     # DB Version 3
     link_to_notify_status = db.Column(db.String) #1이면 보고함.
+    
+    # DB Version 4
+    torrent_info = db.Column(db.JSON)
+    filename = db.Column(db.String)
+    dirname = db.Column(db.String)
+    filecount = db.Column(db.Integer)
 
     def __init__(self):
         self.created_time = datetime.datetime.now()
@@ -324,6 +343,24 @@ class ModelOffcloud2Item(db.Model):
         
         return ret
     
+    def make_torrent_info(self):
+        try:
+            if self.job.use_tracer and self.torrent_info is None and self.link.startswith('magnet'):
+                from torrent_info import Logic as TorrentInfoLogic
+                tmp = TorrentInfoLogic.parse_magnet_uri(self.link)
+                if tmp is not None:
+                    self.torrent_info = tmp
+                    flag_modified(self, "torrent_info")
+                    info = Util.get_max_size_fileinfo(tmp)
+                    self.filename = info['filename']
+                    self.dirname = info['dirname']
+                    self.filecount = tmp['num_files']
+        except Exception as e: 
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+
+
+
     @staticmethod
     def get_rss_list_by_scheduler(job):
         try:
@@ -455,7 +492,7 @@ class ModelOffcloud2Item(db.Model):
             logger.debug('Exception:%s', e)
             logger.debug(traceback.format_exc())
 
-
+    
 
 
 

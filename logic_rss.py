@@ -7,6 +7,7 @@ import time
 import threading
 import json
 import datetime
+import re
 
 # third-party
 from sqlalchemy import desc
@@ -94,7 +95,7 @@ class LogicRss(object):
             telegram_text = json.dumps(telegram, indent=2)
             try:
                 import requests
-                sjva_server_url = 'https://sjva-dev.soju6jan.com/ss/api/off_cache2'
+                sjva_server_url = 'https://sjva-server.soju6jan.com/ss/api/off_cache2'
                 data = {'data':telegram_text}
                 res = requests.post(sjva_server_url, data=data)
                 tmp = res.content
@@ -113,6 +114,12 @@ class LogicRss(object):
             logger.error(e)
             logger.error(traceback.format_exc())
 
+
+    @staticmethod
+    def scheduler_function():
+        LogicRss.scheduler_function_rss_request()
+        LogicRss.scheduler_function_tracer()
+
     # status
     # 0 : 초기 값
     # 1 : 마그넷. 캐쉬. 오버
@@ -130,7 +137,7 @@ class LogicRss(object):
 
 
     @staticmethod
-    def scheduler_function():
+    def scheduler_function_rss_request():
         logger.debug('1. RSS to DB')
         LogicRss.process_insert_feed()
 
@@ -162,6 +169,8 @@ class LogicRss(object):
                                         else:
                                             feed.remote_time = datetime.datetime.now()
                                             ret = Offcloud.add_remote(apikey, feed, account.option_id)
+                                            if feed.job.use_tracer:
+                                                feed.make_torrent_info()
                                             #logger.debubg("요청 : %s", feed.title)
                                             if ret == 'over':
                                                 over_flag = True
@@ -178,6 +187,8 @@ class LogicRss(object):
                                         else:
                                             feed.remote_time = datetime.datetime.now()
                                             ret = Offcloud.add_remote(apikey, feed, account.option_id)
+                                            if feed.job.use_tracer:
+                                                feed.make_torrent_info()
                                             if ret == 'over':
                                                 over_flag = True
                                                 feed.status = 2
@@ -229,6 +240,8 @@ class LogicRss(object):
             
             feed.remote_time = datetime.datetime.now()
             ret = Offcloud.add_remote(apikey, feed, account.option_id)
+            if feed.job.use_tracer:
+                feed.make_torrent_info()
             if ret == 'over':
                 feed.status = 4
             else:
@@ -240,3 +253,134 @@ class LogicRss(object):
             logger.debug(traceback.format_exc())
             return False
 
+
+    @staticmethod
+    def scheduler_function_tracer():
+        try:
+            job_list = ModelOffcloud2Job.get_list()
+            for job in job_list:
+                if not job.use_tracer:
+                    continue
+
+                # 토렌트 인포가 실패할수도 있고, 중간에 추가된 경우도 있기 때문에... 기존에 없었던 경우도 있기때문에..
+                query = db.session.query(ModelOffcloud2Item) \
+                    .filter(ModelOffcloud2Item.job_id == job.id ) \
+                    .filter(ModelOffcloud2Item.oc_status != None ) \
+                    .filter(ModelOffcloud2Item.created_time > datetime.datetime.now() + datetime.timedelta(days=ModelSetting.get_int('tracer_max_day')*-1)) \
+                    .filter(ModelOffcloud2Item.torrent_info == None)
+                items = query.all()
+                logger.debug(len(items))
+                if items:
+                    for feed in items:
+                        feed.make_torrent_info()
+                        db.session.add(feed)
+                        logger.debug(feed.title)
+                        db.session.commit()
+                
+
+                lists = os.listdir(job.mount_path)
+                for target in lists:
+                    try:
+                        logger.debug(target)
+                        fullpath = os.path.join(job.mount_path, target)
+
+                        # 해쉬 변경
+                        match = re.match(r'\w{40}', target)
+                        if match:
+                            feeds = db.session.query(ModelOffcloud2Item).filter(ModelOffcloud2Item.link.like('%' + target)).all()
+                            if len(feeds) == 1:
+                                logger.debug(feeds[0].dirname)
+                                logger.debug(len(feeds[0].dirname))
+                                logger.debug(feeds[0].filename)
+
+                                if feeds[0].dirname != '':
+                                    new_fullpath = os.path.join(job.mount_path, feeds[0].dirname)
+                                else:
+                                    new_fullpath = os.path.join(job.mount_path, feeds[0].filename)
+                                if not os.path.exists(new_fullpath):
+                                    import framework.common.celery as celery_task
+                                    celery_task.move(fullpath, new_fullpath)
+                                    logger.debug('Hash %s %s', fullpath, new_fullpath)
+                                    fullpath = new_fullpath
+                                    target = os.path.basename(new_fullpath)
+                                else:
+                                    logger.debug('HASH NOT MOVED!!!!!!!')
+
+                        if os.path.isdir(fullpath):
+                            feeds = db.session.query(ModelOffcloud2Item).filter(ModelOffcloud2Item.dirname == target).all()
+                        else:
+                            feeds = db.session.query(ModelOffcloud2Item).filter(ModelOffcloud2Item.filename == target).all()
+                        logger.debug('Feeds count : %s', len(feeds))
+                        
+                        # 이규연의 스포트라이트 _신천지 위장단체와 정치_.E237.200319.720p-NEXT
+                        # 이규연의 스포트라이트 (신천지 위장단체와 정치).E237.200319.720p-NEXT.mp4
+                        # 특수문자를 _으로 변경하는 경우 있음. 일단.. 파일만
+                        if len(feeds) == 0:
+                            if os.path.isdir(fullpath):
+                                pass
+                            else:
+                                query = db.session.query(ModelOffcloud2Item)
+                                for t in target.split('_'):
+                                    query = query.filter(ModelOffcloud2Item.filename.like('%'+t+'%' ))
+                                feeds = query.all()
+                                if len(feeds) == 1:
+                                    #rename
+                                    import framework.common.celery as celery_task
+                                    new_fullpath = os.path.join(job.mount_path, feeds[0].filename)
+                                    celery_task.move(fullpath, new_fullpath)
+                                    fullpath = new_fullpath
+                                else:
+                                    logger.debug('EEEEEEEEEEEEEEEEEEEEEEE')
+
+                        for feed in feeds:
+                            logger.debug('제목 : %s, %s', feed.title, feed.filecount)
+                            flag = True
+                            for tmp in feed.torrent_info['files']:
+                                logger.debug('tmp : %s', tmp['path'])
+                                logger.debug(os.path.split(tmp['path']))
+                                if os.path.split(tmp['path'])[0] != '':
+                                    tmp2 = os.path.join(job.mount_path, os.path.sep.join(os.path.split(tmp['path'])))
+                                else:
+                                    tmp2 = os.path.join(job.mount_path, tmp['path'])
+                                logger.debug('Feed check : %s', tmp2)
+                                if os.path.exists(tmp2):
+                                    logger.debug('File Exist : True')
+                                else:
+                                    logger.debug('File Exist : False')
+                                    flag = False
+                                    break
+                            if flag:
+                                dest_fullpath = os.path.join(job.move_path, target)
+                                if os.path.exists(dest_fullpath):
+                                    dup_folder = os.path.join(job.mount_path, u'중복')
+                                    if not os.path.exists(dup_folder):
+                                        os.makedirs(dup_folder)
+                                    dest_folder = dup_folder
+                                else:
+                                    dest_folder = job.move_path
+                                import framework.common.celery as celery_task
+                                celery_task.move(fullpath, dest_folder)
+                                logger.debug('MOVE : %s' % fullpath)
+                    except Exception, e:
+                        logger.debug('Exception:%s', e)
+                        logger.debug(traceback.format_exc())
+
+
+        except Exception, e:
+            logger.debug('Exception:%s', e)
+            logger.debug(traceback.format_exc())
+            return False
+
+    @staticmethod
+    def check_folder_and_info(folder, feed):
+        try:
+            logger.debug(feed.torrent_info['files'])
+            for tmp in feed.torrent_info['files']:
+                logger.debug('tmp : %s', tmp['path'])
+
+
+
+
+        except Exception, e:
+            logger.debug('Exception:%s', e)
+            logger.debug(traceback.format_exc())
