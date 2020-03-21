@@ -365,8 +365,9 @@ class LogicRss(object):
                                     dest_folder = dup_folder
                                 else:
                                     dest_folder = job.move_path
+                                logger.debug('이동 전: %s' % fullpath)
                                 celery_task.move(fullpath, dest_folder)
-                                logger.debug('이동 : %s' % fullpath)
+                                logger.debug('이동 완료: %s' % fullpath)
                             else:
                                 logger.debug('대기 : %s' % fullpath)
                     except Exception, e:
