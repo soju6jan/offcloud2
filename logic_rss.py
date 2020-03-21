@@ -266,7 +266,7 @@ class LogicRss(object):
                 # 토렌트 인포가 실패할수도 있고, 중간에 추가된 경우도 있기 때문에...
                 query = db.session.query(ModelOffcloud2Item) \
                     .filter(ModelOffcloud2Item.job_id == job.id ) \
-                    .filter(ModelOffcloud2Item.oc_status != None ) \
+                    .filter(ModelOffcloud2Item.oc_status != '' ) \
                     .filter(ModelOffcloud2Item.created_time > datetime.datetime.now() + datetime.timedelta(days=ModelSetting.get_int('tracer_max_day')*-1)) \
                     .filter(ModelOffcloud2Item.torrent_info == None) \
                     .filter(ModelOffcloud2Item.link.like('magnet%'))
@@ -353,7 +353,7 @@ class LogicRss(object):
                                 if os.path.exists(tmp2):
                                     logger.debug('File Exist : True')
                                 else:
-                                    logger.debug('File Exist : False')
+                                    logger.debug('파일 없음!!')
                                     flag = False
                                     break
                             if flag:

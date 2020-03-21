@@ -58,8 +58,8 @@ class Offcloud(object):
     def add_remote(key, feed, remote_options_id):
         try:
             result = {}
-            logger.debug('add_remote : %s', remote_options_id)
-            logger.debug('add_remote entity: %s', feed)
+            #logger.debug('add_remote : %s', remote_options_id)
+            #logger.debug('add_remote entity: %s', feed)
 
             url = 'https://offcloud.com/api/remote'
             params = {
