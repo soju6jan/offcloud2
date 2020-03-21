@@ -268,16 +268,17 @@ class LogicRss(object):
                     .filter(ModelOffcloud2Item.job_id == job.id ) \
                     .filter(ModelOffcloud2Item.oc_status != None ) \
                     .filter(ModelOffcloud2Item.created_time > datetime.datetime.now() + datetime.timedelta(days=ModelSetting.get_int('tracer_max_day')*-1)) \
-                    .filter(ModelOffcloud2Item.torrent_info == None)
+                    .filter(ModelOffcloud2Item.torrent_info == None) \
+                    .filter(ModelOffcloud2Item.link.like('magnet%'))
                 items = query.all()
-                logger.debug(len(items))
                 if items:
-                    for feed in items:
+                    for idx, feed in enumerate(items):
                         if feed.make_torrent_info():
                             db.session.add(feed)
                         
                             db.session.commit()
-                        logger.debug(feed.title)
+                        logger.debug('%s/%s %s', idx, len(items), feed.title)
+                #######################################################
 
                 lists = os.listdir(job.mount_path)
                 for target in lists:
@@ -342,13 +343,13 @@ class LogicRss(object):
                             logger.debug('제목 : %s, %s', feed.title, feed.filecount)
                             flag = True
                             for tmp in feed.torrent_info['files']:
-                                logger.debug('tmp : %s', tmp['path'])
+                                logger.debug('PATH : %s', tmp['path'])
                                 logger.debug(os.path.split(tmp['path']))
                                 if os.path.split(tmp['path'])[0] != '':
                                     tmp2 = os.path.join(job.mount_path, os.path.sep.join(os.path.split(tmp['path'])))
                                 else:
                                     tmp2 = os.path.join(job.mount_path, tmp['path'])
-                                logger.debug('Feed check : %s', tmp2)
+                                logger.debug('변환 : %s', tmp2)
                                 if os.path.exists(tmp2):
                                     logger.debug('File Exist : True')
                                 else:
@@ -365,7 +366,9 @@ class LogicRss(object):
                                 else:
                                     dest_folder = job.move_path
                                 celery_task.move(fullpath, dest_folder)
-                                logger.debug('MOVE : %s' % fullpath)
+                                logger.debug('이동 : %s' % fullpath)
+                            else:
+                                logger.debug('대기 : %s' % fullpath)
                     except Exception, e:
                         logger.debug('Exception:%s', e)
                         logger.debug(traceback.format_exc())
