@@ -392,17 +392,3 @@ class LogicRss(object):
             logger.debug('Exception:%s', e)
             logger.debug(traceback.format_exc())
             return False
-
-    @staticmethod
-    def check_folder_and_info(folder, feed):
-        try:
-            logger.debug(feed.torrent_info['files'])
-            for tmp in feed.torrent_info['files']:
-                logger.debug('tmp : %s', tmp['path'])
-
-
-
-
-        except Exception, e:
-            logger.debug('Exception:%s', e)
-            logger.debug(traceback.format_exc())
