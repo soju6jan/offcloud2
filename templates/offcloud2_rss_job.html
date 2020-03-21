@@ -29,7 +29,7 @@
   {{ macros.setting_input_text('job_folderid', 'Folder ID') }}
   {{ macros.setting_radio('job_mode', '다운로드 모드', ['Cache만 받기', '전체 받기', 'Cache 확인만']) }}
   {{ macros.setting_input_int('job_cache_confirm_day', 'Cache 확인 기간', desc='day 단위') }}
-  {{ macros.setting_checkbox('job_use_tracer', '다운로드 추적', desc=['On : hash 로 된 이름을 변경']) }}
+  {{ macros.setting_checkbox('job_use_tracer', '다운로드 추적', desc=['Torrent Info 플러그인 설치 필수']) }}
   <div id="job_use_tracer_div" class="collapse">
   {{ macros.setting_input_text('job_mount_path', '마운트 경로', desc=None) }}
   {{ macros.setting_input_text('job_move_path', '이동 경로', desc=['다운로드 완료 된 파일이나 폴더를 이동할 경로.']) }}

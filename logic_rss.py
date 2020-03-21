@@ -284,6 +284,8 @@ class LogicRss(object):
                 for target in lists:
                     try:
                         logger.debug(target)
+                        if target == 'SJVA':
+                            continue
                         fullpath = os.path.join(job.mount_path, target)
 
                         # 자막파일은 바로 이동
@@ -291,7 +293,18 @@ class LogicRss(object):
                             celery_task.move(fullpath, job.move_path)
                             continue
                         if os.path.splitext(target.lower())[1] == '.aria2__temp':
-                            os.remove(fullpath)
+                            target_folder = os.path.join(job.mount_path, 'SJVA', u'기타')
+                            if not os.path.exists(target_folder):
+                                os.makedirs(target_folder)
+                            celery_task.move(fullpath, target_folder)
+                            continue
+                        
+                        if os.path.splitext(target.lower())[1] == '.torrent':
+                            target_folder = os.path.join(job.mount_path, 'SJVA', u'torrent')
+                            if not os.path.exists(target_folder):
+                                os.makedirs(target_folder)
+                            celery_task.move(fullpath, target_folder)
+                            continue
 
                         # 해쉬 변경
                         match = re.match(r'\w{40}', target)
@@ -299,7 +312,7 @@ class LogicRss(object):
                             feeds = db.session.query(ModelOffcloud2Item).filter(ModelOffcloud2Item.link.like('%' + target)).all()
                             if len(feeds) == 1:
                                 logger.debug(feeds[0].dirname)
-                                logger.debug(len(feeds[0].dirname))
+                                #logger.debug(len(feeds[0].dirname))
                                 logger.debug(feeds[0].filename)
 
                                 if feeds[0].dirname != '':
@@ -359,7 +372,7 @@ class LogicRss(object):
                             if flag:
                                 dest_fullpath = os.path.join(job.move_path, target)
                                 if os.path.exists(dest_fullpath):
-                                    dup_folder = os.path.join(job.mount_path, u'중복')
+                                    dup_folder = os.path.join(job.mount_path, 'SJVA', u'중복')
                                     if not os.path.exists(dup_folder):
                                         os.makedirs(dup_folder)
                                     dest_folder = dup_folder
