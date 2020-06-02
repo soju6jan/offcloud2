@@ -290,20 +290,20 @@ class LogicRss(object):
 
                         # 자막파일은 바로 이동
                         if os.path.splitext(target.lower())[1] in ['.smi', '.srt', 'ass']:
-                            celery_task.move(fullpath, job.move_path)
+                            celery_task.move_exist_remove(fullpath, job.move_path)
                             continue
                         if os.path.splitext(target.lower())[1] == '.aria2__temp':
                             target_folder = os.path.join(job.mount_path, 'SJVA', u'기타')
                             if not os.path.exists(target_folder):
                                 os.makedirs(target_folder)
-                            celery_task.move(fullpath, target_folder)
+                            celery_task.move_exist_remove(fullpath, target_folder)
                             continue
                         
                         if os.path.splitext(target.lower())[1] == '.torrent':
                             target_folder = os.path.join(job.mount_path, 'SJVA', u'torrent')
                             if not os.path.exists(target_folder):
                                 os.makedirs(target_folder)
-                            celery_task.move(fullpath, target_folder)
+                            celery_task.move_exist_remove(fullpath, target_folder)
                             continue
 
                         # 해쉬 변경
@@ -347,7 +347,7 @@ class LogicRss(object):
                                 if len(feeds) == 1:
                                     #rename
                                     new_fullpath = os.path.join(job.mount_path, feeds[0].filename)
-                                    celery_task.move(fullpath, new_fullpath)
+                                    celery_task.move_exist_remove(fullpath, new_fullpath)
                                     fullpath = new_fullpath
                                 else:
                                     logger.debug('EEEEEEEEEEEEEEEEEEEEEEE')
@@ -379,7 +379,7 @@ class LogicRss(object):
                                 else:
                                     dest_folder = job.move_path
                                 logger.debug('이동 전: %s' % fullpath)
-                                celery_task.move(fullpath, dest_folder)
+                                celery_task.move_exist_remove(fullpath, dest_folder)
                                 logger.debug('이동 완료: %s' % fullpath)
                             else:
                                 logger.debug('대기 : %s' % fullpath)
