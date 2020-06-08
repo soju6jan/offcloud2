@@ -14,7 +14,7 @@ from sqlalchemy import desc
 from sqlalchemy import or_, and_, func, not_
 
 # sjva 공용
-from framework import db, scheduler, path_app_root, SystemModelSetting, celery
+from framework import db, scheduler, path_app_root, SystemModelSetting, celery, app
 from framework.job import Job
 from framework.util import Util
 from framework.common.rss import RssUtil
