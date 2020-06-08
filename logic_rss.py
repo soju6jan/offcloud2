@@ -361,7 +361,7 @@ class LogicRss(object):
                                 if len(feeds) == 1:
                                     #rename
                                     new_fullpath = os.path.join(job.mount_path, feeds[0].filename)
-                                    celery_task.move_exist_remove(fullpath, new_fullpath, run_in_celery=True))
+                                    celery_task.move_exist_remove(fullpath, new_fullpath, run_in_celery=True)
                                     fullpath = new_fullpath
                                 #else:
                                 #    logger.debug('EEEEEEEEEEEEEEEEEEEEEEE')
