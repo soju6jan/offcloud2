@@ -14,7 +14,7 @@ from sqlalchemy import desc
 from sqlalchemy import or_, and_, func, not_
 
 # sjva 공용
-from framework import db, scheduler, path_app_root, SystemModelSetting
+from framework import db, scheduler, path_app_root, SystemModelSetting, celery
 from framework.job import Job
 from framework.util import Util
 from framework.common.rss import RssUtil
@@ -118,6 +118,20 @@ class LogicRss(object):
 
     @staticmethod
     def scheduler_function():
+        try:
+            if app.config['config']['use_celery']:
+                result = LogicRss.scheduler_function2.apply_async()
+                result.get()
+            else:
+                result = LogicRss.scheduler_function2()
+        except Exception as e: 
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+
+            
+    @staticmethod
+    @celery.task
+    def scheduler_function2():
         LogicRss.scheduler_function_rss_request()
         LogicRss.scheduler_function_tracer()
 
@@ -290,20 +304,20 @@ class LogicRss(object):
 
                         # 자막파일은 바로 이동
                         if os.path.splitext(target.lower())[1] in ['.smi', '.srt', 'ass']:
-                            celery_task.move_exist_remove(fullpath, job.move_path)
+                            celery_task.move_exist_remove(fullpath, job.move_path, run_in_celery=True)
                             continue
                         if os.path.splitext(target.lower())[1] == '.aria2__temp':
                             target_folder = os.path.join(job.mount_path, 'SJVA', u'기타')
                             if not os.path.exists(target_folder):
                                 os.makedirs(target_folder)
-                            celery_task.move_exist_remove(fullpath, target_folder)
+                            celery_task.move_exist_remove(fullpath, target_folder, run_in_celery=True)
                             continue
                         
                         if os.path.splitext(target.lower())[1] == '.torrent':
                             target_folder = os.path.join(job.mount_path, 'SJVA', u'torrent')
                             if not os.path.exists(target_folder):
                                 os.makedirs(target_folder)
-                            celery_task.move_exist_remove(fullpath, target_folder)
+                            celery_task.move_exist_remove(fullpath, target_folder, run_in_celery=True)
                             continue
 
                         # 해쉬 변경
@@ -320,7 +334,7 @@ class LogicRss(object):
                                 else:
                                     new_fullpath = os.path.join(job.mount_path, feeds[0].filename)
                                 if not os.path.exists(new_fullpath):
-                                    celery_task.move(fullpath, new_fullpath)
+                                    celery_task.move(fullpath, new_fullpath, run_in_celery=True)
                                     #logger.debug('Hash %s %s', fullpath, new_fullpath)
                                     fullpath = new_fullpath
                                     target = os.path.basename(new_fullpath)
@@ -347,7 +361,7 @@ class LogicRss(object):
                                 if len(feeds) == 1:
                                     #rename
                                     new_fullpath = os.path.join(job.mount_path, feeds[0].filename)
-                                    celery_task.move_exist_remove(fullpath, new_fullpath)
+                                    celery_task.move_exist_remove(fullpath, new_fullpath, run_in_celery=True))
                                     fullpath = new_fullpath
                                 #else:
                                 #    logger.debug('EEEEEEEEEEEEEEEEEEEEEEE')
@@ -382,7 +396,7 @@ class LogicRss(object):
                                 else:
                                     dest_folder = job.move_path
                                 #logger.debug('이동 전: %s' % fullpath)
-                                celery_task.move_exist_remove(fullpath, dest_folder)
+                                celery_task.move_exist_remove(fullpath, dest_folder, run_in_celery=True)
                                 #logger.debug('이동 완료: %s' % fullpath)
                             #else:
                             #    logger.debug('대기 : %s' % fullpath)
