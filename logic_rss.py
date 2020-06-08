@@ -277,13 +277,13 @@ class LogicRss(object):
                             db.session.add(feed)
                         
                             db.session.commit()
-                        logger.debug('%s/%s %s', idx, len(items), feed.title)
+                        #logger.debug('%s/%s %s', idx, len(items), feed.title)
                 #######################################################
 
                 lists = os.listdir(job.mount_path)
                 for target in lists:
                     try:
-                        logger.debug(target)
+                        #logger.debug(target)
                         if target == 'SJVA':
                             continue
                         fullpath = os.path.join(job.mount_path, target)
@@ -311,9 +311,9 @@ class LogicRss(object):
                         if match:
                             feeds = db.session.query(ModelOffcloud2Item).filter(ModelOffcloud2Item.link.like('%' + target)).all()
                             if len(feeds) == 1:
-                                logger.debug(feeds[0].dirname)
+                                #logger.debug(feeds[0].dirname)
                                 #logger.debug(len(feeds[0].dirname))
-                                logger.debug(feeds[0].filename)
+                                #logger.debug(feeds[0].filename)
 
                                 if feeds[0].dirname != '':
                                     new_fullpath = os.path.join(job.mount_path, feeds[0].dirname)
@@ -321,7 +321,7 @@ class LogicRss(object):
                                     new_fullpath = os.path.join(job.mount_path, feeds[0].filename)
                                 if not os.path.exists(new_fullpath):
                                     celery_task.move(fullpath, new_fullpath)
-                                    logger.debug('Hash %s %s', fullpath, new_fullpath)
+                                    #logger.debug('Hash %s %s', fullpath, new_fullpath)
                                     fullpath = new_fullpath
                                     target = os.path.basename(new_fullpath)
                                 else:
@@ -349,24 +349,27 @@ class LogicRss(object):
                                     new_fullpath = os.path.join(job.mount_path, feeds[0].filename)
                                     celery_task.move_exist_remove(fullpath, new_fullpath)
                                     fullpath = new_fullpath
-                                else:
-                                    logger.debug('EEEEEEEEEEEEEEEEEEEEEEE')
+                                #else:
+                                #    logger.debug('EEEEEEEEEEEEEEEEEEEEEEE')
 
                         for feed in feeds:
-                            logger.debug('제목 : %s, %s', feed.title, feed.filecount)
+                            #logger.debug('제목 : %s, %s', feed.title, feed.filecount)
                             flag = True
                             for tmp in feed.torrent_info['files']:
-                                logger.debug('PATH : %s', tmp['path'])
-                                logger.debug(os.path.split(tmp['path']))
+                                #logger.debug('PATH : %s', tmp['path'])
+                                #logger.debug(os.path.split(tmp['path']))
                                 if os.path.split(tmp['path'])[0] != '':
                                     tmp2 = os.path.join(job.mount_path, os.path.sep.join(os.path.split(tmp['path'])))
                                 else:
                                     tmp2 = os.path.join(job.mount_path, tmp['path'])
-                                logger.debug('변환 : %s', tmp2)
-                                if os.path.exists(tmp2):
-                                    logger.debug('File Exist : True')
-                                else:
-                                    logger.debug('파일 없음!!')
+                                #logger.debug('변환 : %s', tmp2)
+                                #if os.path.exists(tmp2):
+                                #    logger.debug('File Exist : True')
+                                #else:
+                                #    logger.debug('파일 없음!!')
+                                #    flag = False
+                                #    break
+                                if not os.path.exists(tmp2):
                                     flag = False
                                     break
                             if flag:
@@ -378,17 +381,17 @@ class LogicRss(object):
                                     dest_folder = dup_folder
                                 else:
                                     dest_folder = job.move_path
-                                logger.debug('이동 전: %s' % fullpath)
+                                #logger.debug('이동 전: %s' % fullpath)
                                 celery_task.move_exist_remove(fullpath, dest_folder)
-                                logger.debug('이동 완료: %s' % fullpath)
-                            else:
-                                logger.debug('대기 : %s' % fullpath)
+                                #logger.debug('이동 완료: %s' % fullpath)
+                            #else:
+                            #    logger.debug('대기 : %s' % fullpath)
                     except Exception, e:
-                        logger.debug('Exception:%s', e)
-                        logger.debug(traceback.format_exc())
+                        logger.error('Exception:%s', e)
+                        logger.error(traceback.format_exc())
 
 
         except Exception, e:
-            logger.debug('Exception:%s', e)
-            logger.debug(traceback.format_exc())
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
             return False
