@@ -384,6 +384,7 @@ class LogicRss(object):
                                 #    flag = False
                                 #    break
                                 if not os.path.exists(tmp2):
+                                    logger.debug('NOT FIND :%s', tmp2)
                                     flag = False
                                     break
                             if flag:
