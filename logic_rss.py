@@ -342,7 +342,8 @@ class LogicRss(object):
                                     logger.debug('HASH NOT MOVED!!!!!!!')
 
                         if os.path.isdir(fullpath):
-                            feeds = db.session.query(ModelOffcloud2Item).filter(ModelOffcloud2Item.dirname == target).all()
+                            #feeds = db.session.query(ModelOffcloud2Item).filter(ModelOffcloud2Item.dirname == target).all()
+                            feeds = db.session.query(ModelOffcloud2Item).filter(ModelOffcloud2Item.dirname.link(target+'%').all()
                         else:
                             feeds = db.session.query(ModelOffcloud2Item).filter(ModelOffcloud2Item.filename == target).all()
                         logger.debug('Feeds count : %s, %s, %s', len(feeds), os.path.isdir(fullpath), target)
