@@ -400,7 +400,7 @@ class LogicRss(object):
                                     dest_folder = job.move_path
                                 #logger.debug('이동 전: %s' % fullpath)
                                 celery_task.move_exist_remove(fullpath, dest_folder, run_in_celery=True)
-                                #logger.debug('이동 완료: %s' % fullpath)
+                                logger.debug('이동 완료: %s, %s' % (fullpath, dest_folder))
                             #else:
                             #    logger.debug('대기 : %s' % fullpath)
                     except Exception, e:
