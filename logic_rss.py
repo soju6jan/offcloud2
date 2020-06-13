@@ -345,12 +345,13 @@ class LogicRss(object):
                             feeds = db.session.query(ModelOffcloud2Item).filter(ModelOffcloud2Item.dirname == target).all()
                         else:
                             feeds = db.session.query(ModelOffcloud2Item).filter(ModelOffcloud2Item.filename == target).all()
-                        logger.debug('Feeds count : %s', len(feeds))
+                        logger.debug('Feeds count : %s, %s, %s', len(feeds), os.path.isdir(fullpath), target)
                         
                         # 이규연의 스포트라이트 _신천지 위장단체와 정치_.E237.200319.720p-NEXT
                         # 이규연의 스포트라이트 (신천지 위장단체와 정치).E237.200319.720p-NEXT.mp4
                         # 특수문자를 _으로 변경하는 경우 있음. 일단.. 파일만
                         if len(feeds) == 0:
+
                             if os.path.isdir(fullpath):
                                 pass
                             else:
