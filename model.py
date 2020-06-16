@@ -209,9 +209,13 @@ class ModelOffcloud2Job(db.Model):
     move_path = db.Column(db.String)
     call_job = db.Column(db.String)
 
+    # db_version 5
+    is_http_torrent_rss = db.Column(db.Boolean)
+
     def __init__(self):
         self.created_time = datetime.datetime.now()
         self.use_tracer = False
+        self.is_http_torrent_rss = False
 
     def __repr__(self):
         return repr(self.as_dict())

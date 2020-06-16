@@ -22,7 +22,7 @@ from .logic_rss import LogicRss
 
 class Logic(object): 
     db_default = {
-        'db_version' : '4',
+        'db_version' : '5',
         'apikey' : '',
         'web_page_size': "30", 
 
@@ -200,9 +200,17 @@ class Logic(object):
                 connection.close()
                 ModelSetting.set('db_version', '4')
                 db.session.flush()
-            #if ModelSetting.get('db_version') == '4':
-            #    ModelSetting.set('db_version', '3')
-            #    db.session.flush()
+            
+            if ModelSetting.get('db_version') == '4':
+                import sqlite3
+                db_file = os.path.join(path_app_root, 'data', 'db', '%s.db' % package_name)
+                connection = sqlite3.connect(db_file)
+                cursor = connection.cursor()
+                try: cursor.execute('ALTER TABLE %s_job ADD is_http_torrent_rss INTEGER' % (package_name))
+                except: pass
+                connection.close()
+                ModelSetting.set('db_version', '5')
+                db.session.flush()
         except Exception as e:
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
