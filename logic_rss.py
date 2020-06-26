@@ -301,7 +301,7 @@ class LogicRss(object):
                         if target == 'SJVA':
                             continue
                         fullpath = os.path.join(job.mount_path, target)
-
+ 
                         # 자막파일은 바로 이동
                         if os.path.splitext(target.lower())[1] in ['.smi', '.srt', 'ass']:
                             celery_task.move_exist_remove(fullpath, job.move_path, run_in_celery=True)
@@ -389,6 +389,20 @@ class LogicRss(object):
                                     logger.debug('NOT FIND :%s', tmp2)
                                     flag = False
                                     break
+
+                            #2020-06-26
+                            #생성이 추적기간 끝나면 이동
+                            if flag == False:
+                                try:
+                                    ctime = int(os.path.getctime(fullpath))
+                                    delta = datetime.datatime.now() - datetime.datetime.fromtimestamp(ctime)
+                                    if delta.days >= ModelSetting.get_int('tracer_max_day'):
+                                        flag = True
+                                        logger.debug('TRACER_MAX_DAY OVER')
+                                except Exception, e:
+                                    logger.error('Exception:%s', e)
+                                    logger.error(traceback.format_exc())
+
                             if flag:
                                 dest_fullpath = os.path.join(job.move_path, target)
                                 if os.path.exists(dest_fullpath):
