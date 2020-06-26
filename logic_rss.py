@@ -395,7 +395,7 @@ class LogicRss(object):
                             if flag == False:
                                 try:
                                     ctime = int(os.path.getctime(fullpath))
-                                    delta = datetime.datatime.now() - datetime.datetime.fromtimestamp(ctime)
+                                    delta = datetime.datetime.now() - datetime.datetime.fromtimestamp(ctime)
                                     if delta.days >= ModelSetting.get_int('tracer_max_day'):
                                         flag = True
                                         logger.debug('TRACER_MAX_DAY OVER')
