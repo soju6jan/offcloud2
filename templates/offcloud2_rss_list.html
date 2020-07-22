@@ -46,10 +46,18 @@
 var package_name = "{{arg['package_name'] }}";
 var current_data = null;
 var is_available_normal_download = ("{{arg['is_available_normal_download']}}" == 'True')
-
+var last_list_option = "{{arg['last_list_option_rss']}}";
 
 $(document).ready(function(){
-  request_search('1', true);
+  tmp = last_list_option.split('|');
+  if (tmp.length == 4) {
+    document.getElementById("search_word").value = tmp[0];
+    document.getElementById("job_select").value = tmp[1];
+    document.getElementById("option").value = tmp[2];
+    request_search(tmp[3]);
+  } else {
+    request_search('1', true);
+  }
 });
 
 

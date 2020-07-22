@@ -35,6 +35,7 @@ class Logic(object):
         'auto_start_rss' : 'False',
         'interval_rss' : '10',
         'tracer_max_day' : '3',
+        'last_list_option_rss' : '',
 
         # cache
         'cache_save_type_list' : '',

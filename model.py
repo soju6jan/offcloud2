@@ -413,7 +413,10 @@ class ModelOffcloud2Item(db.Model):
                 option = req.form['option']
 
             query = ModelOffcloud2Item.make_query(job_name=job_select, option=option, search=search)
-            
+            last_list_option_rss
+            last_list_option_rss = '%s|%s|%s|%s|%s' % (search, job_select, option, page)
+            ModelSetting.set('last_list_option_rss', last_list_option_rss)
+
             count = query.count()
             query = (query.order_by(desc(ModelOffcloud2Item.id))
                         .limit(page_size)
