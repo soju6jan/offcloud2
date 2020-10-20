@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 #########################################################
 # python
-import urllib
-import urllib2
 import traceback
 import json
 import logging
@@ -10,7 +8,7 @@ import logging
 # third-party
 
 # sjva 공용
-
+from framework import py_urllib
 # 패키지
 from .plugin import logger, package_name
 #########################################################
@@ -39,9 +37,9 @@ class Offcloud(object):
             logger.debug('get_remote_account : %s', key)
             url = 'https://offcloud.com/api/remote/accounts'
             params = {'key' : key}
-            postdata = urllib.urlencode(params) 
-            request = urllib2.Request(url, postdata)
-            response = urllib2.urlopen(request)
+            postdata = py_urllib.urlencode(params) 
+            request = py_urllib2.Request(url, postdata)
+            response = py_urllib2.urlopen(request)
             data = json.load(response)
             logger.debug(data)
             if 'data' in data:
@@ -68,9 +66,9 @@ class Offcloud(object):
                 'remoteOptionId' : remote_options_id,
                 'folderId' : feed.oc_folderid,
             }
-            postdata = urllib.urlencode( params ) 
-            request = urllib2.Request(url, postdata)
-            response = urllib2.urlopen(request)
+            postdata = py_urllib.urlencode( params ) 
+            request = py_urllib2.Request(url, postdata)
+            response = py_urllib2.urlopen(request)
             data = response.read()
             result = json.loads(data)
             logger.debug('ADD REMOTE ret: %s', result)
@@ -102,9 +100,9 @@ class Offcloud(object):
                 'remoteOptionId' : remote_options_id,
                 'folderId' : folder_id,
             }
-            postdata = urllib.urlencode( params ) 
-            request = urllib2.Request(url, postdata)
-            response = urllib2.urlopen(request)
+            postdata = py_urllib.urlencode( params ) 
+            request = py_urllib2.Request(url, postdata)
+            response = py_urllib2.urlopen(request)
             data = response.read()
             result = json.loads(data)
             return result
@@ -118,9 +116,9 @@ class Offcloud(object):
         try:
             url = 'https://offcloud.com/api/remote/status'
             params = {'key' : key, 'requestId' : feed.oc_requestId}
-            postdata = urllib.urlencode( params ) 
-            request = urllib2.Request(url, postdata)
-            response = urllib2.urlopen(request)
+            postdata = py_urllib.urlencode( params ) 
+            request = py_urllib2.Request(url, postdata)
+            response = py_urllib2.urlopen(request)
             data = response.read()
             data = json.loads(data)
             feed.oc_json = data
@@ -187,9 +185,9 @@ class Offcloud(object):
                 'remoteOptionId' : entity.remoteOptionId,
                 'folderId' : entity.folderid,
             }
-            postdata = urllib.urlencode( params ) 
-            request = urllib2.Request(url, postdata)
-            response = urllib2.urlopen(request)
+            postdata = py_urllib.urlencode( params ) 
+            request = py_urllib2.Request(url, postdata)
+            response = py_urllib2.urlopen(request)
             data = response.read()
             logger.debug('ADD : %s', data)
             #result = json.load(response)
@@ -221,8 +219,8 @@ class Offcloud(object):
         try:
             logger.debug('retry : %s', entity.entry_title)
             url = 'https://offcloud.com/api/remote/retry/%s?key=%s' % (entity.requestId, key)
-            request = urllib2.Request(url)
-            response = urllib2.urlopen(request)
+            request = py_urllib2.Request(url)
+            response = py_urllib2.urlopen(request)
             logger.debug(url)
             logger.debug(response.read())
 
@@ -256,10 +254,10 @@ class Offcloud(object):
             params = {'hashes' : magnet_list}
             #params = 
             """
-            postdata = urllib.urlencode( params ).encode()
-            #postdata = urllib.urlencode(d)
-            request = urllib2.Request(url, postdata)
-            response = urllib2.urlopen(request)
+            postdata = py_urllib.urlencode( params ).encode()
+            #postdata = py_urllib.urlencode(d)
+            request = py_urllib2.Request(url, postdata)
+            response = py_urllib2.urlopen(request)
 
             logger.debug(url)
             logger.debug(response.read())
@@ -277,9 +275,9 @@ class Offcloud(object):
                     'remoteOptionId' : remoteOptionId,
                     'folderId' : '10b5Z-0RA08d6p2iMNQ9D__7e5gWOV6v5',
                 }
-                postdata = urllib.urlencode( params ) 
-                request = urllib2.Request(url, postdata)
-                response = urllib2.urlopen(request)
+                postdata = py_urllib.urlencode( params ) 
+                request = py_urllib2.Request(url, postdata)
+                response = py_urllib2.urlopen(request)
                 data = response.read()
                 logger.debug('ADD : %s', data)
                 #result = json.load(response)

@@ -73,7 +73,7 @@ class LogicCache(object):
             folder_id = ModelSetting.get('default_folder_id')
             ret = Offcloud.add_remote_by_magnet(apikey, h, remoteOptionId, folder_id)
             return ret
-        except Exception, e:
+        except Exception as e:
             logger.debug('Exception:%s', e)
             logger.debug(traceback.format_exc())
             return str(e)

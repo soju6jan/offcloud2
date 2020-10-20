@@ -31,19 +31,19 @@ from .offcloud_api import Offcloud
 #########################################################
 blueprint = Blueprint(package_name, package_name, url_prefix='/%s' %  package_name, template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
 menu = {
-    'main' : [package_name, 'Offcloud2'],
+    'main' : [package_name, u'Offcloud2'],
     'sub' : [
-        ['account', '계정 설정'], ['direct', '기본 다운로드'], ['rss', 'RSS 다운로드'], ['cache', 'Cache'], ['log', '로그']
+        ['account', u'계정 설정'], ['direct', u'기본 다운로드'], ['rss', u'RSS 다운로드'], ['cache', u'Cache'], ['log', u'로그']
     ],
     'sub2' : {
         'direct' : [
-            ['setting', '설정'], ['request', '다운로드 요청']
+            ['setting', u'설정'], ['request', u'다운로드 요청']
         ],
         'rss' : [
-            ['setting', '설정'], ['job', '작업'], ['list', '목록']
+            ['setting', u'설정'], ['job', u'작업'], ['list', u'목록']
         ],
         'cache' : [
-            ['setting', '설정'], ['list', '목록']
+            ['setting', u'설정'], ['list', u'목록']
         ]
     },
     'category' : 'torrent'
@@ -51,10 +51,10 @@ menu = {
 
 plugin_info = {
     'version' : '0.1.0.0',
-    'name' : 'offcloud2',
+    'name' : u'offcloud2',
     'category_name' : 'torrent',
     'developer' : 'soju6jan',
-    'description' : 'Offcloud2 이용 플러그인',
+    'description' : u'Offcloud2 이용 플러그인',
     'home' : 'https://github.com/soju6jan/offcloud2',
     'more' : '',
 }

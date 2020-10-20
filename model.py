@@ -147,7 +147,7 @@ class ModelOffcloud2Account(db.Model):
             if by_dict:
                 tmp = [x.as_dict() for x in tmp]
             return tmp
-        except Exception, e:
+        except Exception as e:
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
 
@@ -160,7 +160,7 @@ class ModelOffcloud2Account(db.Model):
                     entity = ModelOffcloud2Account(tmp)
                     db.session.add(entity)
             db.session.commit()
-        except Exception, e:
+        except Exception as e:
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
 
@@ -170,7 +170,7 @@ class ModelOffcloud2Account(db.Model):
         try:
             tmp = db.session.query(ModelOffcloud2Account).filter_by(username=username).first()
             return tmp
-        except Exception, e:
+        except Exception as e:
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
 
@@ -259,7 +259,7 @@ class ModelOffcloud2Job(db.Model):
             if by_dict:
                 tmp = [x.as_dict() for x in tmp]
             return tmp
-        except Exception, e:
+        except Exception as e:
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
 
@@ -427,7 +427,7 @@ class ModelOffcloud2Item(db.Model):
             ret['list'] = [item.as_dict() for item in lists]
             ret['paging'] = Util.get_paging_info(count, page, page_size)
             return ret
-        except Exception, e:
+        except Exception as e:
             logger.debug('Exception:%s', e)
             logger.debug(traceback.format_exc())
 
@@ -447,7 +447,7 @@ class ModelOffcloud2Item(db.Model):
                 )
             lists = query.all()
             return lists
-        except Exception, e:
+        except Exception as e:
             logger.debug('Exception:%s', e)
             logger.debug(traceback.format_exc())
 
@@ -495,7 +495,7 @@ class ModelOffcloud2Item(db.Model):
 
 
             return query
-        except Exception, e:
+        except Exception as e:
             logger.debug('Exception:%s', e)
             logger.debug(traceback.format_exc())
 
@@ -593,7 +593,7 @@ class ModelOffcloud2Cache(db.Model):
             ret['list'] = [item.as_dict() for item in lists]
             ret['paging'] = Util.get_paging_info(count, page, page_size)
             return ret
-        except Exception, e:
+        except Exception as e:
             logger.debug('Exception:%s', e)
             logger.debug(traceback.format_exc())
 
@@ -613,7 +613,7 @@ class ModelOffcloud2Cache(db.Model):
             lists = query.all()
             logger.debug('RET count : %s', len(lists))
             return lists
-        except Exception, e:
+        except Exception as e:
             logger.debug('Exception:%s', e)
             logger.debug(traceback.format_exc())
 
@@ -654,6 +654,6 @@ class ModelOffcloud2Cache(db.Model):
                     query = query.filter(ModelOffcloud2Cache.id % int(tmp[0]) == int(tmp[1]))
 
             return query
-        except Exception, e:
+        except Exception as e:
             logger.debug('Exception:%s', e)
             logger.debug(traceback.format_exc())

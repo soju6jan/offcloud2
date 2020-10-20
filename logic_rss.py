@@ -99,13 +99,13 @@ class LogicRss(object):
                 sjva_server_url = 'https://sjva-server.soju6jan.com/ss/api/off_cache2'
                 data = {'data':telegram_text}
                 res = requests.post(sjva_server_url, data=data)
-                tmp = res.content
+                tmp = res.text
                 feed.link_to_notify_status = '1'
                 db.session.add(feed)
                 db.session.commit()
-                if res.content == 'append':
+                if res.text == 'append':
                     return True
-                elif res.content == 'exist':
+                elif res.text == 'exist':
                     return False
             except Exception as e:
                 logger.error('Exception:%s', e)
@@ -263,7 +263,7 @@ class LogicRss(object):
                 feed.status = 9
             db.session.commit()
             return True
-        except Exception, e:
+        except Exception as e:
             logger.debug('Exception:%s', e)
             logger.debug(traceback.format_exc())
             return False
@@ -399,7 +399,7 @@ class LogicRss(object):
                                     if delta.days >= ModelSetting.get_int('tracer_max_day'):
                                         flag = True
                                         logger.debug('TRACER_MAX_DAY OVER')
-                                except Exception, e:
+                                except Exception as e:
                                     logger.error('Exception:%s', e)
                                     logger.error(traceback.format_exc())
 
@@ -417,12 +417,12 @@ class LogicRss(object):
                                 logger.debug('이동 완료: %s, %s' % (fullpath, dest_folder))
                             #else:
                             #    logger.debug('대기 : %s' % fullpath)
-                    except Exception, e:
+                    except Exception as e:
                         logger.error('Exception:%s', e)
                         logger.error(traceback.format_exc())
 
 
-        except Exception, e:
+        except Exception as e:
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
             return False
