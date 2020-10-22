@@ -8,7 +8,7 @@ import logging
 # third-party
 
 # sjva 공용
-from framework import py_urllib
+from framework import py_urllib, py_urllib2
 # 패키지
 from .plugin import logger, package_name
 #########################################################
