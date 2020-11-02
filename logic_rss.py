@@ -47,7 +47,7 @@ class LogicRss(object):
                     for feed in reversed(feed_list):
                         if db.session.query(ModelOffcloud2Item).filter_by(job_id=job.id, link=feed.link).first() is None:
                             r = ModelOffcloud2Item()
-                            r.title = feed.title
+                            r.title = u'%s' % feed.title
                             r.link = feed.link
                             #db.session.add(r)
                             job.rss_list.append(r)

@@ -356,9 +356,9 @@ class ModelOffcloud2Item(db.Model):
                     self.torrent_info = tmp
                     flag_modified(self, "torrent_info")
                     info = Util.get_max_size_fileinfo(tmp)
-                    self.filename = info['filename']
-                    self.dirname = info['dirname']
-                    self.filecount = tmp['num_files']
+                    self.filename = u'%s' % info['filename']
+                    self.dirname = u'%s' % info['dirname']
+                    self.filecount = u'%s' % tmp['num_files']
                     return True
         except Exception as e: 
             logger.error('Exception:%s', e)
