@@ -17,6 +17,7 @@ from framework import db, scheduler, path_app_root, SystemModelSetting
 from framework.job import Job
 from framework.util import Util
 from framework.common.rss import RssUtil
+from tool_base import ToolBaseNotify
 
 # 패키지
 from .plugin import logger, package_name
@@ -48,8 +49,7 @@ class LogicCache(object):
                         if SystemModelSetting.get_bool('auth_use_apikey'):
                             url += '&apikey=%s' % SystemModelSetting.get('auth_apikey')
                         msg += '➕ 리모트 다운로드 추가\n<%s>' % url
-                        import framework.common.notify as Notify
-                        Notify.send_message(msg, message_id='offcloud2_cache_receive')
+                        ToolBaseNotify.send_message(msg, message_id='offcloud2_cache_receive')
         except Exception as e:
             logger.error(e)
             logger.error(traceback.format_exc())
