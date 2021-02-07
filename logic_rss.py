@@ -96,7 +96,7 @@ class LogicRss(object):
             telegram_text = json.dumps(telegram, indent=2)
             try:
                 import requests
-                sjva_server_url = 'https://sjva-server.soju6jan.com/ss/api/off_cache2'
+                sjva_server_url = 'https://server.sjva.me/ss/api/off_cache2'
                 data = {'data':telegram_text}
                 res = requests.post(sjva_server_url, data=data)
                 tmp = res.text
