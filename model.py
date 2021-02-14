@@ -462,7 +462,9 @@ class ModelOffcloud2Item(db.Model):
                 query = query.filter_by(job_id=job.id)
 
             if search is not None and search != '':
-                if search.find('|') != -1:
+                if search.startswith('magnet:?'):# 마그넷 검색을 위해서 추가한 부분
+                    query = query.filter(ModelOffcloud2Item.link.like('%'+search+'%'))# 마그넷 검색을 위해서 추가한 부분
+                elif search.find('|') != -1:
                     tmp = search.split('|')
                     conditions = []
                     for tt in tmp:
