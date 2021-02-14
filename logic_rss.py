@@ -8,6 +8,7 @@ import threading
 import json
 import datetime
 import re
+import requests#보내기 직전에 넣으려고 했는데 이상하게 실행이 되지 않아서 맨위에 넣었습니다.
 
 # third-party
 from sqlalchemy import desc
@@ -167,7 +168,33 @@ class LogicRss(object):
 
                 cached_list = LogicRss.process_cached_list(rss_list)
                 logger.debug('2. job name:%s count:%s, cache count:%s', job.name, len(rss_list), len(cached_list))
+                
+                # <<======================================  각 아이템을 DB에서 찾아서 다운 완료면 offcloud에서 삭제하는 로직
+                remote_history = requests.get("https://offcloud.com/api/remote/history?apikey=" + apikey)
+                remote_history = remote_history.json()
+                #logger.debug("===================== offcloud 작업 json 임포트 완료 ")
 
+                for remote_item in remote_history:                
+                    remote_magnet = str(remote_item.get('originalLink'))
+                    query = db.session.query(ModelOffcloud2Item) \
+                        .filter(ModelOffcloud2Item.link.like(remote_magnet))
+                        #.filter(ModelOffcloud2Item.oc_status == 'downloaded' ) \
+                    items = query.all()
+                    
+                    if items:
+                        for idx, feed in enumerate(items):
+                            if feed.oc_status != 'downloaded':#offcloud 에서 완료된 아이템 삭제전 DB에 downloaded 상태로 업데이트
+                                Offcloud.refresh_status(apikey, feed)
+                                
+                            if feed.oc_status == 'downloaded':
+                                remote_remove_req = "https://offcloud.com/remote/remove/" + str(remote_item.get('requestId')) + "?" + apikey
+                                logger.debug("================ 마그넷 링크 매치됨, 리모트 작업 삭제 리퀘스트 전송")
+                                remote_remove_req_result = requests.get(remote_remove_req)
+                                remote_remove_req_result = remote_remove_req_result.json()                            
+                                remote_remove_req_result = "다운완료된 것 삭제 | " + str(feed.oc_requestId) + " | " + str(feed.title) + " | " + str(feed.link) + " | " + str(remote_remove_req) + " | 결과: " + str(remote_remove_req_result)
+                                logger.debug(remote_remove_req_result)
+                # ======================================>>  각 아이템을 DB에서 찾아서 다운 완료면 offcloud에서 삭제하는 로직
+                
                 for feed in rss_list:
                     try:
                         # 요청 안한 것들
