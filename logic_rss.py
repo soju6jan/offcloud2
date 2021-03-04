@@ -31,7 +31,6 @@ from .offcloud_api import Offcloud
 
 class LogicRss(object): 
 
-
     @staticmethod
     def process_insert_feed():
         try:
