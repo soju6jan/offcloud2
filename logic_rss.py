@@ -157,6 +157,7 @@ class LogicRss(object):
     def scheduler_function_remove_history():
         try:
             # <<======================================  각 아이템을 DB에서 찾아서 다운 완료면 offcloud에서 삭제하는 로직
+            apikey = ModelSetting.get('apikey')
             remote_history = requests.get("https://offcloud.com/api/remote/history?apikey=" + apikey)
             remote_history = remote_history.json()
             #logger.debug("===================== offcloud 작업 json 임포트 완료 ")
