@@ -177,6 +177,7 @@ class LogicRss(object):
                         if feed.oc_status == 'downloaded':
                             remote_remove_req = "https://offcloud.com/remote/remove/" + str(remote_item.get('requestId')) + "?" + apikey
                             logger.debug("================ 마그넷 링크 매치됨, 리모트 작업 삭제 리퀘스트 전송")
+                            logger.debug('remote_remove_req : %s', remote_remove_req)
                             remote_remove_req_result = requests.get(remote_remove_req)
                             remote_remove_req_result = remote_remove_req_result.json()                            
                             remote_remove_req_result = "다운완료된 것 삭제 | " + str(feed.oc_requestId) + " | " + str(feed.title) + " | " + str(feed.link) + " | " + str(remote_remove_req) + " | 결과: " + str(remote_remove_req_result)
