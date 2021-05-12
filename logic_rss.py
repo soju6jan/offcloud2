@@ -45,8 +45,8 @@ class LogicRss(object):
                     #
                     values = [x.strip() for x in job.rss_regex.split('\n')]
                     regex_list = Util.get_list_except_empty(values)
-                    logger.warning(regex_list)
-                    logger.warning(job.rss_mode)
+                    #logger.warning(regex_list)
+                    #logger.warning(job.rss_mode)
                     for feed in reversed(feed_list):
                         if db.session.query(ModelOffcloud2Item).filter_by(job_id=job.id, link=feed.link).first() is None:
                             # 2021-05-21
