@@ -22,7 +22,7 @@ from .logic_rss import LogicRss
 
 class Logic(object): 
     db_default = {
-        'db_version' : '5',
+        'db_version' : '6',
         'apikey' : '',
         'web_page_size': "30", 
 
@@ -212,6 +212,18 @@ class Logic(object):
                 except: pass
                 connection.close()
                 ModelSetting.set('db_version', '5')
+                db.session.flush()
+            if ModelSetting.get('db_version') == '5':
+                import sqlite3
+                db_file = os.path.join(path_app_root, 'data', 'db', '%s.db' % package_name)
+                connection = sqlite3.connect(db_file)
+                cursor = connection.cursor()
+                try: cursor.execute('ALTER TABLE %s_job ADD rss_mode INTEGER' % (package_name))
+                except: pass
+                try: cursor.execute('ALTER TABLE %s_job ADD rss_regex VARCHAR' % (package_name))
+                except: pass
+                connection.close()
+                ModelSetting.set('db_version', '6')
                 db.session.flush()
         except Exception as e:
             logger.error('Exception:%s', e)

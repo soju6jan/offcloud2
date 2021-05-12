@@ -212,6 +212,12 @@ class ModelOffcloud2Job(db.Model):
     # db_version 5
     is_http_torrent_rss = db.Column(db.Boolean)
 
+    # db_version 6
+    rss_mode = db.Column(db.Boolean) # True : 화이트리스트  , False : 블랙리스트
+    rss_regex = db.Column(db.String) # \n 구분  블랙리스트이고 비어있으면 다 받음. 블랙리스트 매칭되면 안 받음. 
+    # 화이트리스트이고 비어있으면 안 받음
+    # 화이트리스트고 매칭되면 받음
+
     def __init__(self):
         self.created_time = datetime.datetime.now()
         self.use_tracer = False
@@ -235,6 +241,8 @@ class ModelOffcloud2Job(db.Model):
                 job = db.session.query(ModelOffcloud2Job).filter_by(id=job_id).first()
             job.name = req.form['job_name']
             job.rss_url = req.form['job_rss_url']
+            job.rss_mode = (req.form['job_rss_mode'] == 'True')
+            job.rss_regex = req.form['job_rss_regex']
             job.username = req.form['job_username']
             job.folderid = req.form['job_folderid']
             job.mode = req.form['job_mode']

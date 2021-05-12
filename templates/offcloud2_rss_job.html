@@ -25,6 +25,8 @@
   <input type="hidden" id="job_id" name="job_id"/>
   {{ macros.setting_input_text('job_name', 'Name', col='4', desc=['API에서 사용할 이름']) }}
   {{ macros.setting_input_text_and_buttons('job_rss_url', 'RSS URL', [['job_test_rss_btn', '링크']]) }}
+  {{ macros.setting_checkbox('job_rss_mode', 'RSS 매칭 모드', desc=['On : 화이트리스트 모드, Off : 블랙리스트 모드']) }}
+  {{ macros.setting_input_textarea('job_rss_regex', 'RSS 매칭 정규식', row='5', desc=['화이트리스트 and 정규식 없음 : 전체 추가되지 않음', '화이트리스트 and 정규식 매칭 : 매칭시 추가', '블랙리스트 and 정규식 없음 : 모두 받음', '블랙리스트 and 정규식 매칭 : 매칭된 피드만 제외하고 모두 추가', '구분자 엔터']) }}
   {{ macros.setting_select_empty('job_username', '계정', col='6') }}
   {{ macros.setting_input_text('job_folderid', 'Folder ID') }}
   {{ macros.setting_radio('job_mode', '다운로드 모드', ['Cache만 받기', '전체 받기', 'Cache 확인만']) }}
@@ -144,13 +146,16 @@ $("body").on('click', '#add_job_btn', function(e){
   document.getElementById("job_id").value = -1
   document.getElementById("job_name").value = ''
   document.getElementById("job_rss_url").value = ''
+  $('#job_rss_mode').bootstrapToggle('off');
+  document.getElementById("job_rss_regex").value = ''
+
   make_account_select('');
   //document.getElementById("job_username").value = ''
   document.getElementById("job_folderid").value = ''
   document.getElementById("job_cache_confirm_day").value = 7
   document.getElementById("job_remove_btn").disabled = true;
   $('input[name=job_mode]')[0].checked = true;
-  $('#job_use_tracer').bootstrapToggle('off')
+  $('#job_use_tracer').bootstrapToggle('off');
   document.getElementById("job_mount_path").value = ''
   document.getElementById("job_move_path").value = ''
   document.getElementById("job_call_job").value = ''
@@ -171,6 +176,12 @@ $("body").on('click', '#job_setting_btn', function(e){
       document.getElementById("job_id").value = current_data.jobs[i].id;
       document.getElementById("job_name").value = current_data.jobs[i].name;
       document.getElementById("job_rss_url").value = current_data.jobs[i].rss_url;
+      if (current_data.jobs[i].rss_mode) {
+        $('#job_rss_mode').bootstrapToggle('on')
+      } else {
+        $('#job_rss_mode').bootstrapToggle('off')
+      }
+      document.getElementById("job_rss_regex").value = current_data.jobs[i].rss_regex;
       make_account_select(current_data.jobs[i].username);
       document.getElementById("job_folderid").value = current_data.jobs[i].folderid;
       document.getElementById("job_cache_confirm_day").value = current_data.jobs[i].cache_confirm_day;

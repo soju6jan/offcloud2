@@ -15,9 +15,8 @@ from sqlalchemy import desc
 from sqlalchemy import or_, and_, func, not_
 
 # sjva 공용
-from framework import db, scheduler, path_app_root, SystemModelSetting, celery, app
+from framework import db, scheduler, path_app_root, SystemModelSetting, celery, app, Util
 from framework.job import Job
-from framework.util import Util
 from framework.common.rss import RssUtil
 import framework.common.celery as celery_task
 
@@ -44,8 +43,38 @@ class LogicRss(object):
                     flag_commit = False
                     count = 0
                     #
+                    values = [x.strip() for x in job.rss_regex.split('\n')]
+                    regex_list = Util.get_list_except_empty(values)
+                    logger.warning(regex_list)
+                    logger.warning(job.rss_mode)
                     for feed in reversed(feed_list):
                         if db.session.query(ModelOffcloud2Item).filter_by(job_id=job.id, link=feed.link).first() is None:
+                            # 2021-05-21
+                            if job.rss_mode: #화이트리스트
+                                flag_append = False
+                                try:
+                                    for regex in regex_list:
+                                        if re.compile(regex).search(feed.title):
+                                            flag_append = True
+                                            break
+                                except Exception as e:
+                                    logger.error(e)
+                                    logger.error(traceback.format_exc())
+                                if flag_append == False:
+                                    continue
+                            else: #블랙리스트
+                                flag_append = True
+                                try:
+                                    for regex in regex_list:
+                                        if re.compile(regex).search(feed.title):
+                                            flag_append = False
+                                            break
+                                except Exception as e:
+                                    logger.error(e)
+                                    logger.error(traceback.format_exc())
+                            if flag_append == False:
+                                continue
+
                             r = ModelOffcloud2Item()
                             r.title = u'%s' % feed.title
                             r.link = feed.link
