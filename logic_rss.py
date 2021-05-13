@@ -43,8 +43,11 @@ class LogicRss(object):
                     flag_commit = False
                     count = 0
                     #
-                    values = [x.strip() for x in job.rss_regex.split('\n')]
-                    regex_list = Util.get_list_except_empty(values)
+                    try:
+                        values = [x.strip() for x in job.rss_regex.split('\n')]
+                        regex_list = Util.get_list_except_empty(values)
+                    except:
+                        regex_list = []
                     #logger.warning(regex_list)
                     #logger.warning(job.rss_mode)
                     for feed in reversed(feed_list):
