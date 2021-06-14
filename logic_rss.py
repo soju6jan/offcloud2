@@ -8,7 +8,7 @@ import threading
 import json
 import datetime
 import re
-import requests#보내기 직전에 넣으려고 했는데 이상하게 실행이 되지 않아서 맨위에 넣었습니다.
+import requests
 
 # third-party
 from sqlalchemy import desc
@@ -168,6 +168,8 @@ class LogicRss(object):
         LogicRss.scheduler_function_tracer()
         if ModelSetting.get_bool('remove_history_on_web'):
             LogicRss.scheduler_function_remove_history()
+        if ModelSetting.get_bool('remove_cloud_history_on_web'):
+            LogicRss.scheduler_function_remove_cloud_history()            
 
     # status
     # 0 : 초기 값
@@ -187,7 +189,6 @@ class LogicRss(object):
     @staticmethod
     def scheduler_function_remove_history():
         try:
-            # <<======================================  각 아이템을 DB에서 찾아서 다운 완료면 offcloud에서 삭제하는 로직
             apikey = ModelSetting.get('apikey')
             remote_history = requests.get("https://offcloud.com/api/remote/history?apikey=" + apikey)
             remote_history = remote_history.json()
@@ -207,16 +208,49 @@ class LogicRss(object):
                             
                         if feed.oc_status == 'downloaded':
                             remote_remove_req = "https://offcloud.com/remote/remove/" + str(remote_item.get('requestId')) + "?apikey=" + apikey
-                            logger.debug("================ 마그넷 링크 매치됨, 리모트 작업 삭제 리퀘스트 전송")
-                            logger.debug('remote_remove_req : %s', remote_remove_req)
+                            # logger.debug("================ 마그넷 링크 매치됨, 리모트 작업 삭제 리퀘스트 전송")
+                            # logger.debug('remote_remove_req : %s', remote_remove_req)
                             remote_remove_req_result = requests.get(remote_remove_req)
                             remote_remove_req_result = remote_remove_req_result.json()                            
-
                             if remote_remove_req_result.get('success'):
                                 remote_remove_req_result = "offcloud 완료 | " + str(feed.title) + " | " + str(feed.link) + " | " + str(feed.oc_requestId) + " | " + str(remote_remove_req) + " | 결과: " + str(remote_remove_req_result)
                                 logger.debug(remote_remove_req_result)
 
-            # ======================================>>  각 아이템을 DB에서 찾아서 다운 완료면 offcloud에서 삭제하는 로직
+        except Exception as e:
+            logger.error(e)
+            logger.error(traceback.format_exc())        
+
+
+    @staticmethod
+    def scheduler_function_remove_cloud_history():
+        try:
+            apikey = ModelSetting.get('apikey')
+            cloud_history = requests.get("https://offcloud.com/api/cloud/history?apikey=" + apikey)
+            cloud_history = cloud_history.json()
+            #logger.debug("===================== offcloud 작업 json 임포트 완료 ")
+
+            for cloud_item in cloud_history:                
+                cloud_magnet = str(cloud_item.get('originalLink'))
+                query = db.session.query(ModelOffcloud2Item) \
+                    .filter( or_(ModelOffcloud2Item.oc_status == 'downloaded' , ModelOffcloud2Item.oc_status == 'uploading' , ModelOffcloud2Item.oc_status == 'NOSTATUS' )) \
+                    .filter(ModelOffcloud2Item.oc_cached == True ) \
+                    .filter(ModelOffcloud2Item.link.like(cloud_magnet))
+                items = query.all()
+                
+                if items:
+                    for idx, feed in enumerate(items):
+                        cloud_remove_req = "https://offcloud.com/cloud/remove/" + str(cloud_item.get('requestId')) + "?apikey=" + apikey
+                        # logger.debug(cloud_remove_req)
+                        # logger.debug(cloud_item.get('originalLink'))
+                        # logger.debug(feed.title)
+                        # logger.debug(feed.link)
+                        # logger.debug(cloud_item.get('originalLink'), cloud_item.get('fileName'), cloud_item.get('requestId'))
+                        # logger.debug("================ 마그넷 링크 매치됨, 클라우드 작업 삭제 리퀘스트 전송")
+                        cloud_remove_req_result = requests.get(cloud_remove_req)
+                        cloud_remove_req_result = cloud_remove_req_result.json()
+                        cloud_remove_req_result = "cloud history 삭제 | " + str(feed.title) + " | " + str(feed.link) + " | " + str(feed.oc_requestId) + " | " + str(cloud_remove_req) + " | 결과: " + str(cloud_remove_req_result)
+                        logger.debug(cloud_remove_req_result)
+
         except Exception as e:
             logger.error(e)
             logger.error(traceback.format_exc())        
@@ -239,9 +273,17 @@ class LogicRss(object):
                 cached_list = LogicRss.process_cached_list(rss_list)
                 logger.debug('2. job name:%s count:%s, cache count:%s', job.name, len(rss_list), len(cached_list))
                 
-               
+                i = 0 # 계정 분산처리를 위한 인덱스
                 for feed in rss_list:
                     try:
+                        i = i + 1
+                        if job.username2:
+                            # logger.debug('======= 계정 분산처리 =======')
+                            # account2 = ModelOffcloud2Account.get(job.username2)
+                            account2 = [x.strip().replace(' ', '').strip() for x in job.username2.replace('\n', '||').split('||')]
+                            account2 = Util.get_list_except_empty(account2)
+                            ii = i % len(account2)
+                            account = ModelOffcloud2Account.get(account2[ii])                        
                         # 요청 안한 것들
                         if feed.status < 6:
                             feed.oc_folderid = job.folderid

@@ -217,6 +217,10 @@ class ModelOffcloud2Job(db.Model):
     rss_regex = db.Column(db.String) # \n 구분  블랙리스트이고 비어있으면 다 받음. 블랙리스트 매칭되면 안 받음. 
     # 화이트리스트이고 비어있으면 안 받음
     # 화이트리스트고 매칭되면 받음
+    
+    # db_version 7
+    username2 = db.Column(db.String) # 계정 분산 처리용
+    
 
     def __init__(self):
         self.created_time = datetime.datetime.now()
@@ -244,6 +248,7 @@ class ModelOffcloud2Job(db.Model):
             job.rss_mode = (req.form['job_rss_mode'] == 'True')
             job.rss_regex = req.form['job_rss_regex']
             job.username = req.form['job_username']
+            job.username2 = req.form['job_username2']
             job.folderid = req.form['job_folderid']
             job.mode = req.form['job_mode']
             job.cache_confirm_day = int(req.form['job_cache_confirm_day'])
