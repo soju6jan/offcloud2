@@ -29,6 +29,7 @@ class Logic(object):
         # Direct
         'default_username' : '',
         'default_folder_id' : '',
+        'upload_folder_list' : '',
         
         # RSS
         'request_http_start_link' : 'False',
@@ -37,6 +38,7 @@ class Logic(object):
         'tracer_max_day' : '3',
         'last_list_option_rss' : '',
         'remove_history_on_web' : 'False',
+        'remove_cloud_history_on_web' : 'False',
 
         # cache
         'cache_save_type_list' : '',
@@ -225,6 +227,19 @@ class Logic(object):
                 connection.close()
                 ModelSetting.set('db_version', '6')
                 db.session.flush()
+            
+            if ModelSetting.get('db_version') == '6':
+                import sqlite3
+                db_file = os.path.join(path_app_root, 'data', 'db', '%s.db' % package_name)
+                connection = sqlite3.connect(db_file)
+                cursor = connection.cursor()
+                try: cursor.execute('ALTER TABLE %s_job ADD username2 VARCHAR' % (package_name))
+                except: pass
+                connection.close()
+                ModelSetting.set('db_version', '7')
+                db.session.flush()
+            
+            
         except Exception as e:
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())

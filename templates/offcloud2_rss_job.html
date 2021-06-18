@@ -28,6 +28,7 @@
   {{ macros.setting_checkbox('job_rss_mode', 'RSS 매칭 모드', desc=['On : 화이트리스트 모드, Off : 블랙리스트 모드']) }}
   {{ macros.setting_input_textarea('job_rss_regex', 'RSS 매칭 정규식', row='5', desc=['화이트리스트 and 정규식 없음 : 전체 추가되지 않음', '화이트리스트 and 정규식 매칭 : 매칭시 추가', '블랙리스트 and 정규식 없음 : 모두 받음', '블랙리스트 and 정규식 매칭 : 매칭된 피드만 제외하고 모두 추가', '구분자 엔터']) }}
   {{ macros.setting_select_empty('job_username', '계정', col='6') }}
+  {{ macros.setting_input_textarea('job_username2', '계정 분산', desc=['https://offcloud.com/#/account에서 Remote accounts에 등록한 username을 입력' , 'Enter로 구분. 다운로드 1건 마다 각계정이 순서대로 사용됨' , '비워두면 [계정]에서 선택된 한개의 계정만 사용'], row='5') }}
   {{ macros.setting_input_text('job_folderid', 'Folder ID') }}
   {{ macros.setting_radio('job_mode', '다운로드 모드', ['Cache만 받기', '전체 받기', 'Cache 확인만']) }}
   {{ macros.setting_input_int('job_cache_confirm_day', 'Cache 확인 기간', desc='day 단위') }}
@@ -83,6 +84,7 @@ function make_account_select(job_username) {
 $("#job_save_btn").click(function(e) {
   e.preventDefault();
   var formData = get_formdata('#job_form');
+  console.log(formData)
   $.ajax({
     url: '/'+package_name+'/ajax/save_job',
     type: "POST", 
@@ -151,6 +153,7 @@ $("body").on('click', '#add_job_btn', function(e){
 
   make_account_select('');
   //document.getElementById("job_username").value = ''
+  document.getElementById("job_username2").value = ''
   document.getElementById("job_folderid").value = ''
   document.getElementById("job_cache_confirm_day").value = 7
   document.getElementById("job_remove_btn").disabled = true;
@@ -183,6 +186,7 @@ $("body").on('click', '#job_setting_btn', function(e){
       }
       document.getElementById("job_rss_regex").value = current_data.jobs[i].rss_regex;
       make_account_select(current_data.jobs[i].username);
+      document.getElementById("job_username2").value = current_data.jobs[i].username2;
       document.getElementById("job_folderid").value = current_data.jobs[i].folderid;
       document.getElementById("job_cache_confirm_day").value = current_data.jobs[i].cache_confirm_day;
       document.getElementById("job_remove_btn").disabled = false;
